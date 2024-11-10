@@ -25,7 +25,7 @@ void fill_row(size_t n_cols, size_t i_row, int color) {
     std::string row(n_cols, ' ');
 
     attron(COLOR_PAIR(color));
-    mvprintw((int)i_row, 0, row.c_str());
+    mvprintw(i_row, 0, row.c_str());
     attroff(COLOR_PAIR(color));
 }
 

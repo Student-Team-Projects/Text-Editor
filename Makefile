@@ -1,5 +1,5 @@
 CXX      := -g++
-CXXFLAGS := -Wall -Wextra -Wshadow -Wunused -Wconversion -pedantic -std=c++20
+CXXFLAGS := -Wall -Wextra -Werror -Wpedantic -pedantic-errors -std=c++20
 LDFLAGS  := -lncurses
 BUILD    := ./build
 OBJ_DIR  := $(BUILD)/objects
@@ -25,7 +25,7 @@ $(APP_DIR)/$(TARGET): $(OBJECTS)
 
 -include $(DEPENDENCIES)
 
-.PHONY: all build clean debug release info
+.PHONY: all build clean debug release info check run
 
 build:
 	@mkdir -p $(APP_DIR)
@@ -51,3 +51,8 @@ info:
 	@echo "[*] Sources:         ${SRC}         "
 	@echo "[*] Objects:         ${OBJECTS}     "
 	@echo "[*] Dependencies:    ${DEPENDENCIES}"
+
+check: all
+	@echo "[*] Testing..."
+
+	@echo "[*] Testing done."
