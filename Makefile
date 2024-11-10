@@ -1,5 +1,5 @@
 CXX      := -g++
-CXXFLAGS := -Wall -Wextra -D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUG_PEDANTIC -Wshadow -Wunused -Wconversion -g3 -std=c++20
+CXXFLAGS := -Wall -Wextra -Wshadow -Wunused -Wconversion -pedantic -std=c++20
 LDFLAGS  := -lncurses
 BUILD    := ./build
 OBJ_DIR  := $(BUILD)/objects
@@ -31,11 +31,15 @@ build:
 	@mkdir -p $(APP_DIR)
 	@mkdir -p $(OBJ_DIR)
 
-debug: CXXFLAGS += -DDEBUG -g
+debug: CXXFLAGS += -g3 -D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUG_PEDANTIC -fsanitize=address -fsanitize=undefined
 debug: all
 
-release: CXXFLAGS += -O2
+release: CXXFLAGS += -O3
 release: all
+
+run: all
+	@echo "[*] Running..."
+	@./$(APP_DIR)/$(TARGET)
 
 clean:
 	-@rm -rvf $(OBJ_DIR)/*
