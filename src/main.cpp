@@ -21,23 +21,21 @@ void initialize_ncurses() {
     init_pair(4, COLOR_BLACK, COLOR_GREEN);
 }
 
-void fill_row(int n_row, int color) {
-    int COLS, ROWS;
-    getmaxyx(stdscr, ROWS, COLS);
-    std::string row(COLS, ' ');
+void fill_row(size_t n_cols, size_t i_row, int color) {
+    std::string row(n_cols, ' ');
 
     attron(COLOR_PAIR(color));
-    mvprintw(n_row, 0, row.c_str());
+    mvprintw((int)i_row, 0, row.c_str());
     attroff(COLOR_PAIR(color));
 }
 
 const std::vector<std::string> topmenu_items = {"~F~ile", "~E~dit", "~W~indows", "~S~ettings"};
 const std::vector<std::string> bottommenu_items = {"~Ctrl+N~ New", "~Ctrl+O~ Open", "~Ctrl+S~ Save", "~Ctrl+Q~ Quit"};
 
-void draw_menu(const std::vector<std::string> &items, int COLS, int ROW, int line_begin = 2, int selected = -1) {
-    fill_row(ROW, 1);
+void draw_menu(const std::vector<std::string> &items, size_t n_cols, size_t i_row, size_t line_begin = 2, size_t selected = size_t(-1)) {
+    fill_row(n_cols, i_row, 1);
 
-    int x = line_begin;
+    size_t x = line_begin;
     for (size_t i = 0; i < items.size(); i += 1) {
         auto set_format = [i, selected]() {
             if (i == selected) {
@@ -55,39 +53,43 @@ void draw_menu(const std::vector<std::string> &items, int COLS, int ROW, int lin
         };
         set_format();
 
-        mvaddch(ROW, x, ' ');
+        mvaddch(i_row, x, ' ');
         x += 1;
 
-        int m = 0;
-        for (size_t j = 0; j < items[i].size(); j += 1) {
-            if (items[i][j] == '~') {
-                m ^= 1;
-                if (m) {
+        bool isShortcut = 0;
+        for (auto j : items[i]) {
+            if (j == '~') {
+                isShortcut ^= 1;
+                if (isShortcut) {
                     set_shortcut_format();
                 } else {
                     set_format();
                 }
                 continue;
             }
-            mvaddch(ROW, x, items[i][j]);
+            mvaddch(i_row, x, j);
             x += 1;
         }
 
-        mvaddch(ROW, x, ' ');
+        mvaddch(i_row, x, ' ');
         x += 1;
     }
 }
 
-void draw_topmenu(int selected) {
-    int COLS, ROWS;
-    getmaxyx(stdscr, ROWS, COLS);
-    draw_menu(topmenu_items, COLS, 0, 2, selected);
+auto get_dimensions() {
+    size_t n_cols, n_rows;
+    getmaxyx(stdscr, n_rows, n_cols);
+    return std::make_pair(n_cols, n_rows);
+}
+
+void draw_topmenu(size_t selected) {
+    auto [n_cols, n_rows] = get_dimensions();
+    draw_menu(topmenu_items, n_cols, 0, 2, selected);
 }
 
 void draw_bottommenu() {
-    int COLS, ROWS;
-    getmaxyx(stdscr, ROWS, COLS);
-    draw_menu(bottommenu_items, COLS, ROWS - 1, 0);
+    auto [n_cols, n_rows] = get_dimensions();
+    draw_menu(bottommenu_items, n_cols, n_rows - 1, 0);
 }
 
 int main() {
@@ -102,14 +104,10 @@ int main() {
 
         switch (key) {
         case KEY_LEFT:
-            if (selected > 0) {
-                selected -= 1;
-            }
+            if (selected > 0) selected -= 1;
             break;
         case KEY_RIGHT:
-            if (selected + 1 < topmenu_items.size()) {
-                selected += 1;
-            }
+            if (selected + 1 < topmenu_items.size()) selected += 1;
             break;
         case CTRL('q'):
             endwin();
