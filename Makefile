@@ -54,5 +54,4 @@ info:
 
 check: all
 	@echo "[*] Testing..."
-
 	@echo "[*] Testing done."
