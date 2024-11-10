@@ -1,6 +1,9 @@
 #include <cassert>
+#include <chrono>
 #include <ncurses.h>
+#include <poll.h>
 #include <string>
+#include <unistd.h>
 #include <vector>
 
 #ifndef CTRL
@@ -11,6 +14,7 @@ void initialize_ncurses() {
     initscr();
     raw();
     noecho();
+    nodelay(stdscr, TRUE);
     keypad(stdscr, TRUE);
     curs_set(0);
     start_color();
@@ -19,6 +23,7 @@ void initialize_ncurses() {
     init_pair(2, COLOR_BLACK, COLOR_WHITE);
     init_pair(3, COLOR_RED, COLOR_GREEN);
     init_pair(4, COLOR_BLACK, COLOR_GREEN);
+    init_pair(5, COLOR_WHITE, COLOR_BLUE);
 }
 
 void fill_row(size_t n_cols, size_t i_row, int color) {
@@ -87,6 +92,23 @@ void draw_topmenu(size_t selected) {
     draw_menu(topmenu_items, n_cols, 0, 2, selected);
 }
 
+void draw_time() {
+    auto [n_cols, n_rows] = get_dimensions();
+    auto now = std::chrono::system_clock::now();
+    auto now_time_t = std::chrono::system_clock::to_time_t(now);
+    auto now_str = std::string(ctime(&now_time_t));
+
+    attron(COLOR_PAIR(2));
+    mvaddnstr(0, n_cols - now_str.size() + 1, now_str.c_str(), now_str.size());
+}
+
+void draw_background() {
+    auto [n_cols, n_rows] = get_dimensions();
+    for (size_t i = 1; i < n_rows - 1; i += 1) {
+        fill_row(n_cols, i, 5);
+    }
+}
+
 void draw_bottommenu() {
     auto [n_cols, n_rows] = get_dimensions();
     draw_menu(bottommenu_items, n_cols, n_rows - 1, 0);
@@ -98,22 +120,28 @@ int main() {
 
     while (true) {
         draw_topmenu(selected);
+        draw_time();
+        draw_background();
         draw_bottommenu();
         refresh();
-        int key = getch();
 
-        switch (key) {
-        case KEY_LEFT:
-            if (selected > 0) selected -= 1;
-            break;
-        case KEY_RIGHT:
-            if (selected + 1 < topmenu_items.size()) selected += 1;
-            break;
-        case CTRL('q'):
-            endwin();
-            return 0;
+        struct pollfd pfd = {0, POLLIN, 0};
+        int ret = poll(&pfd, 1, 500);
+        if (ret > 0) {
+            int key = getch();
+
+            switch (key) {
+            case KEY_LEFT:
+                if (selected > 0) selected -= 1;
+                break;
+            case KEY_RIGHT:
+                if (selected + 1 < topmenu_items.size()) selected += 1;
+                break;
+            case CTRL('q'):
+                endwin();
+                return 0;
+            }
         }
     }
-
     assert(false);
 }
