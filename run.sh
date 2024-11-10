@@ -1,3 +1,1 @@
-
-g++ -lncurses main.cc -o main
-./main
+g++ -lncurses main.cpp -o main -std=c++20 && ./main
