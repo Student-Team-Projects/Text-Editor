@@ -11,6 +11,7 @@ void initialize_ncurses() {
     curs_set(0);          // hide cursor
     start_color();        // enable color
     atexit(exit_ncurses); // call exit_ncurses() at exit
+    set_escdelay(25);     // set the escape delay to 25ms
 
     if (has_colors() == false) {
         printf("Your terminal does not support color\n");
@@ -18,11 +19,11 @@ void initialize_ncurses() {
         exit(1);
     }
 
-    init_pair(1, COLOR_RED, COLOR_WHITE);
-    init_pair(2, COLOR_BLACK, COLOR_WHITE);
-    init_pair(3, COLOR_RED, COLOR_GREEN);
-    init_pair(4, COLOR_BLACK, COLOR_GREEN);
-    init_pair(5, COLOR_WHITE, COLOR_BLUE);
+    init_pair(64, COLOR_RED, COLOR_WHITE);
+    init_pair(65, COLOR_BLACK, COLOR_WHITE);
+    init_pair(66, COLOR_RED, COLOR_GREEN);
+    init_pair(67, COLOR_BLACK, COLOR_GREEN);
+    init_pair(68, COLOR_WHITE, COLOR_BLUE);
 }
 
 void exit_ncurses() { endwin(); }

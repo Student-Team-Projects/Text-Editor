@@ -1,7 +1,9 @@
+CC := gcc
 CXX := g++
 LD := g++
+CCFLAGS := -Wall -Wextra -Werror -Wpedantic -pedantic-errors -std=c11
 CXXFLAGS := -Wall -Wextra -Werror -Wpedantic -pedantic-errors -std=c++20
-LDFLAGS := -lncurses
+LDFLAGS := -lncurses -lpanel
 
 debug: CXXFLAGS += -g3 -D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUG_PEDANTIC -fsanitize=address -fsanitize=undefined
 debug: LDFLAGS += -g3 -fsanitize=address -fsanitize=undefined
@@ -13,8 +15,14 @@ builddir := build
 outdir := bin
 
 SOURCES := $(wildcard $(srcdir)/*.cpp)
+SOURCES += $(wildcard $(srcdir)/extern/*.c)
+
 OBJS := $(SOURCES:$(srcdir)/%.cpp=$(builddir)/%.o)
+OBJS := $(OBJS:$(srcdir)/extern/%.c=$(builddir)/%.o)
+
 DEPS := $(SOURCES:$(srcdir)/%.cpp=$(builddir)/%.d)
+DEPS := $(DEPS:$(srcdir)/extern/%.c=$(builddir)/%.d)
+
 TARGET := $(outdir)/program
 
 all: release
@@ -33,6 +41,15 @@ $(builddir)/%.o: $(srcdir)/%.cpp $(builddir)/%.d
 $(builddir)/%.d: $(srcdir)/%.cpp
 	@mkdir -p build
 	@$(CXX) $< -MM | \
+	sed 's=\($*\)\.o[ :]*=$(builddir)/\1.o $@:=g' > $@
+
+$(builddir)/%.o: $(srcdir)/extern/%.c $(builddir)/%.d
+	@mkdir -p build
+	$(CC) $< $(CCFLAGS) -c -o $@
+
+$(builddir)/%.d: $(srcdir)/extern/%.c
+	@mkdir -p build
+	@$(CC) $< -MM | \
 	sed 's=\($*\)\.o[ :]*=$(builddir)/\1.o $@:=g' > $@
 
 clean:
