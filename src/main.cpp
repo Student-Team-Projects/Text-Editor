@@ -1,4 +1,3 @@
-#include "bottom_row.hpp"
 #include "main_window.hpp"
 #include "menu.hpp"
 #include "ncurses_utils.hpp"
@@ -14,9 +13,7 @@ get_event(MEVENT *mevent, bool *alt) {
     int c;
 
     *alt = false;
-
 repeat:
-
     c = getch();
 
     /*
@@ -31,7 +28,7 @@ repeat:
             goto repeat;
     }
 
-    if (c == 27) { // escape character
+    if (c == 27) {
         if (first_event) {
             first_event = false;
             goto repeat;
@@ -39,7 +36,6 @@ repeat:
     }
 
     *alt = !first_event;
-
     return c;
 }
 
@@ -48,10 +44,6 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *argv[]) {
     initialize_menu();
 
     auto [n_rows, n_cols] = get_dimensions(stdscr);
-
-    WINDOW *bottom_row_window = subwin(stdscr, 1, n_cols, n_rows - 1, 0);
-    BottomRow bottom_row(bottom_row_window);
-
     WINDOW *timer_window = subwin(stdscr, 1, TIMER_SIZE, 0, n_cols - TIMER_SIZE);
     Timer timer(timer_window);
 
@@ -59,12 +51,10 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *argv[]) {
     MainWindow main(main_window);
 
     refresh();
-    bottom_row.draw();
     timer.draw();
     main.draw();
 
     while (1) {
-        // bottom_row.draw(); don't need to, the only static element we will have :P
         timer.draw();
 
         MEVENT mevent;

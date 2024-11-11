@@ -25,6 +25,17 @@ ST_MENU_ITEM menubar[] = {
     {const_cast<char *>("~C~onfig"), 62, NULL, 0, 0, 0, _config},
     {NULL, -1, NULL, 0, 0, 0, NULL}};
 
+ST_CMDBAR *cmdbar;
+ST_CMDBAR_ITEM bottombar[] = {
+    {const_cast<char *>("Help"), false, 1, 1, 0},
+    {const_cast<char *>("Menu"), false, 2, 2, 0},
+    {const_cast<char *>("View"), false, 3, 3, 0},
+    {const_cast<char *>("Edit"), false, 4, 4, 0},
+    {const_cast<char *>("Copy"), false, 5, 5, 0},
+    {const_cast<char *>("PullDn"), false, 9, 99, 0},
+    {const_cast<char *>("Quit"), false, 10, 100, 0},
+    {NULL, false, 0, 0, 0}};
+
 void initialize_menu() {
     setlocale(LC_ALL, "");
     config.encoding = nl_langinfo(CODESET);
@@ -40,6 +51,9 @@ void initialize_menu() {
     st_menu_set_focus(menu, ST_MENU_FOCUS_ALT_MOUSE);
     st_menu_post(menu);
 
+    cmdbar = st_cmdbar_new(&config, bottombar);
+    st_cmdbar_post(cmdbar);
+
     atexit(kill_menu);
 }
 
@@ -50,6 +64,7 @@ void kill_menu() {
 
 void refresh_menu() {
     st_menu_post(menu);
+    st_cmdbar_post(cmdbar);
     doupdate();
 }
 
@@ -60,12 +75,31 @@ bool process_menu(int c, bool alt, MEVENT *mevent) {
     bool activated;
     ST_MENU_ITEM *item = st_menu_selected_item(&activated);
     if (processed and activated) {
-        if (item->code == 34) {
+        if (item->code == 34 || item->code == 100) {
             exit(0);
             return true;
         }
+    } else if (processed) {
+        ST_CMDBAR_ITEM *item = st_menu_selected_command(&activated);
+        if (activated) {
+            if (item->code == 100) {
+                exit(0);
+                return true;
+            } else if (item->code == 99) {
+                st_menu_set_focus(menu, ST_MENU_FOCUS_FULL);
+                refresh_menu();
+            } else {
+                return true;
+            }
+        }
     }
-    if (!processed and (c == ST_MENU_ESCAPE or c == KEY_MOUSE)) {
+
+    if (!processed and c == ST_MENU_ESCAPE) {
+        st_menu_set_focus(menu, ST_MENU_FOCUS_ALT_MOUSE);
+        refresh_menu();
+        return true;
+    }
+    if (!processed and (c == KEY_MOUSE or c == KEY_F(10))) {
         st_menu_set_focus(menu, ST_MENU_FOCUS_ALT_MOUSE);
         refresh_menu();
         return true;

@@ -1,7 +1,7 @@
 CC := gcc
 CXX := g++
 LD := g++
-CCFLAGS := -Wall -Wextra -Werror -Wpedantic -pedantic-errors -std=c11
+CCFLAGS := -Wall -Wextra -Werror -Wpedantic -pedantic-errors
 CXXFLAGS := -Wall -Wextra -Werror -Wpedantic -pedantic-errors -std=c++20
 LDFLAGS := -lncurses -lpanel
 
