@@ -3,7 +3,14 @@
 
 t_hello_app::t_hello_app()
     : TProgInit(&t_hello_app::initStatusLine, &t_hello_app::initMenuBar,
-                &t_hello_app::initDeskTop) {}
+                &t_hello_app::initDeskTop) {
+  TRect rect = getExtent();
+  rect.a.x = rect.b.x - t_clock_view::time_size;
+  rect.b.y = rect.a.y + 1;
+  m_clock = new t_clock_view(rect);
+  m_clock->growMode = gfGrowLoX | gfGrowHiX;
+  insert(m_clock);
+}
 
 void t_hello_app::greeting_box() {
   auto *dialog = new TDialog(TRect(25, 5, 55, 16), "Hello, World!");
@@ -45,6 +52,13 @@ auto t_hello_app::initStatusLine(TRect rect) -> TStatusLine * {
   return new TStatusLine(rect, *new TStatusDef(0, 0xFFFF) +
                                    *new TStatusItem("~Alt-X~ Exit", kbAltX, cmQuit) +
                                    *new TStatusItem(0, kbF10, cmMenu));
+}
+
+auto t_hello_app::idle() -> void {
+  TApplication::idle();
+  if (m_clock != nullptr) {
+    m_clock->update();
+  }
 }
 
 auto main() -> int {

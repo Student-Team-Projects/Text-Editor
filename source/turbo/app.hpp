@@ -14,6 +14,7 @@
 #define Uses_TStatusItem
 #define Uses_TStatusDef
 #define Uses_TDeskTop
+#include "clockView.hpp"
 #include "tvision/tv.h"
 
 const int greet_them_cmd = 100;
@@ -23,9 +24,11 @@ class t_hello_app : public TApplication {
   t_hello_app();
 
   void handleEvent(TEvent &event) override;
+  void idle() override;
   static auto initMenuBar(TRect rect) -> TMenuBar *;
   static auto initStatusLine(TRect rect) -> TStatusLine *;
 
   private:
   static void greeting_box();
+  t_clock_view *m_clock;
 };
