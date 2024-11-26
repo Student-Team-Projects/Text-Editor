@@ -3,6 +3,6 @@
 
 namespace turbo_core {
 void xyz::do_something() {
-    // Do something
+  // Do something
 }
 } // namespace turbo_core

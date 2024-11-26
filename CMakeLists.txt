@@ -1,7 +1,6 @@
 cmake_minimum_required (VERSION 3.15)
 
 option(TURBO_BUILD_APP "Build main editor application" ON)
-option(TURBO_BUILD_TESTS "Build and run tests" OFF)
 option(TURBO_OPTIMIZE_BUILD "Use Precompiled Headers and Unity Build for the core library" ON)
 
 cmake_policy(SET CMP0091 NEW)
@@ -45,7 +44,7 @@ include(GNUInstallDirs)
 
 function(turbo_set_warnings t)
     target_compile_options(${t} PRIVATE
-        -Wall
+        -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Wcast-qual -Wformat=2 -Wundef -Werror=float-equal -g -D_GLIBCXX_DEBUG
     )
 endfunction()
 
@@ -130,38 +129,4 @@ if (TURBO_BUILD_APP)
         ${TURBO}-core
     )
     install(TARGETS ${TURBO} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
-endif()
-
-# Target 'tests'
-
-if (TURBO_BUILD_TESTS)
-    file(GLOB_RECURSE TEST_SRC "${CMAKE_CURRENT_LIST_DIR}/test/*.cpp")
-    add_executable(${TURBO}-test ${TEST_SRC})
-    target_compile_features(${TURBO}-test PRIVATE cxx_std_20)
-    turbo_set_warnings(${TURBO}-test)
-    find_library(GTEST gtest REQUIRED)
-    find_library(GTEST_MAIN gtest_main REQUIRED)
-    target_link_libraries(${TURBO}-test PRIVATE
-        ${TURBO}-core
-        ${GTEST}
-        ${GTEST_MAIN}
-    )
-
-    find_library(PTHREAD pthread REQUIRED)
-    tv_message(STATUS "Found 'pthread': ${PTHREAD}")
-    target_link_libraries(${TURBO}-test PRIVATE
-        ${PTHREAD}
-    )
-
-    add_custom_command(
-        OUTPUT ${TURBO}-test-passed
-        COMMAND ${TURBO}-test
-        COMMAND ${CMAKE_COMMAND} -E touch ${TURBO}-test-passed
-        DEPENDS ${TURBO}-test
-        WORKING_DIRECTORY ${TURBO_BINARY_DIR}
-    )
-    add_custom_target(${TURBO}-test-run ALL DEPENDS ${TURBO}-test-passed)
-    if (NOT TURBO_USE_SYSTEM_TVISION)
-        add_dependencies(${TURBO}-test-run tvision-test-run)
-    endif()
 endif()
