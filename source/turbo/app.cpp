@@ -1,5 +1,4 @@
-#include "app.hpp"
-#include "some_shared_include.hpp"
+#include <turbo/app.hpp>
 
 t_hello_app::t_hello_app()
     : TProgInit(&t_hello_app::initStatusLine, &t_hello_app::initMenuBar,

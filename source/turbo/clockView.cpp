@@ -1,6 +1,7 @@
-#include "clockView.hpp"
+#include <cassert>
 #include <ctime>
 #include <string>
+#include <turbo/clockView.hpp>
 
 t_clock_view::t_clock_view(TRect &rect) : TView(rect) {
   m_last_time = std::string(t_clock_view::time_size, ' ');
@@ -17,12 +18,13 @@ void t_clock_view::draw() {
 }
 
 void t_clock_view::update() {
-  time_t cur_t = time(0);
-  char *date = ctime(&cur_t);
+  auto now = std::chrono::system_clock::now();
+  std::time_t cur_t = std::chrono::system_clock::to_time_t(now);
+  std::tm *ptm = std::localtime(&cur_t);
 
-  std::string date_str(date);
-  const int time_start = 11;
-  m_cur_time = date_str.substr(time_start, t_clock_view::time_size);
+  std::size_t result =
+      std::strftime(m_cur_time.data(), t_clock_view::time_size, time_format.data(), ptm);
+  assert(result == t_clock_view::time_size - 1);
 
   if (m_last_time != m_cur_time) {
     drawView();
