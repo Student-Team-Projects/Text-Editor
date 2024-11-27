@@ -6,7 +6,7 @@
 
 class t_clock_view : public TView {
   public:
-  constexpr static const std::string time_format = "%H:%M:%S";
+  static constexpr std::string_view time_format = "%H:%M:%S";
   static const int time_size = (2 + 1) + (2 + 1) + (2) + 1;
 
   explicit t_clock_view(TRect &rect);
