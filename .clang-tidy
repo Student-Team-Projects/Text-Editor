@@ -14,7 +14,8 @@ Checks: "*,\
   -misc-non-private-member-variables-in-classes,\
   -cppcoreguidelines-owning-memory,\
   -cppcoreguidelines-pro-type-union-access,\
-  -fuchsia-multiple-inheritance"
+  -fuchsia-multiple-inheritance,\
+  -concurrency-mt-unsafe"
 WarningsAsErrors: ''
 CheckOptions:
   - key: 'bugprone-argument-comment.StrictMode'

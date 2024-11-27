@@ -1,4 +1,5 @@
 #include <turbo/app.hpp>
+#include <turbo/clockView.hpp>
 
 t_hello_app::t_hello_app()
     : TProgInit(&t_hello_app::initStatusLine, &t_hello_app::initMenuBar,
