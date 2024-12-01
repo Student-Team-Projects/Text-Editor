@@ -20,13 +20,15 @@
 #include <tvision/tv.h>
 
 const int greet_them_cmd = 100;
+const int cm_toggle_tree = 101;
 
 class t_hello_app : public TApplication {
   public:
   t_hello_app();
+  static t_hello_app *app;
 
-  void handleEvent(TEvent &event) override;
-  void idle() override;
+  auto handleEvent(TEvent &event) -> void override;
+  auto idle() -> void override;
   static auto initMenuBar(TRect rect) -> TMenuBar *;
   static auto initStatusLine(TRect rect) -> TStatusLine *;
 

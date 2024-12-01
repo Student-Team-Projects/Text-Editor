@@ -1,9 +1,9 @@
+#include <algorithm>
 #include <filesystem>
 #include <turbo/app.hpp>
 #include <turbo/clockView.hpp>
-
-#include <iostream>
-#include <unistd.h>
+#include <turbo/explorerWindow.hpp>
+#include <tvision/tv.h>
 
 t_hello_app::t_hello_app()
     : TProgInit(&t_hello_app::initStatusLine, &t_hello_app::initMenuBar,
@@ -19,14 +19,16 @@ t_hello_app::t_hello_app()
   {
     TRect rect = deskTop->getExtent();
     if (rect.b.x > 22) {
-      rect.a.x = rect.b.x - min(max(rect.b.x - 82, 22), 30);
+      rect.a.x = rect.b.x - std::min(std::max(rect.b.x - 82, 22), 30);
+      rect.b.x = rect.b.x - rect.a.x;
+      rect.a.x = 0;
     }
     auto current_path = std::filesystem::current_path().string();
 
     m_explorer = new t_explorer_window(rect, current_path);
     m_explorer->flags &= ~wfZoom;
     m_explorer->growMode = gfGrowLoX | gfGrowHiX | gfGrowHiY;
-    m_explorer->setState(sfShadow, false);
+    m_explorer->setState(sfShadow, /*enable=*/false);
     deskTop->insert(m_explorer);
     if (deskTop->size.x - m_explorer->size.x < 82) {
       m_explorer->hide();
@@ -55,6 +57,10 @@ void t_hello_app::handleEvent(TEvent &event) {
       greeting_box();
       clearEvent(event);
       break;
+    case cm_toggle_tree:
+      m_explorer->toggle_tree();
+      clearEvent(event);
+      break;
     default:
       break;
     }
@@ -66,6 +72,7 @@ auto t_hello_app::initMenuBar(TRect rect) -> TMenuBar * {
   return new TMenuBar(
       rect, *new TSubMenu("~H~ello", kbAltH) +
                 *new TMenuItem("~G~reeting...", greet_them_cmd, kbAltG) + newLine() +
+                *new TMenuItem("~T~oggle tree", cm_toggle_tree, kbF9, hcNoContext, "F9") +
                 *new TMenuItem("E~x~it", cmQuit, cmQuit, hcNoContext, "Alt-X"));
 }
 
@@ -73,7 +80,7 @@ auto t_hello_app::initStatusLine(TRect rect) -> TStatusLine * {
   rect.a.y = rect.b.y - 1;
   return new TStatusLine(rect, *new TStatusDef(0, 0xFFFF) +
                                    *new TStatusItem("~Alt-X~ Exit", kbAltX, cmQuit) +
-                                   *new TStatusItem(0, kbF10, cmMenu));
+                                   *new TStatusItem(nullptr, kbF10, cmMenu));
 }
 
 auto t_hello_app::idle() -> void {
@@ -83,8 +90,11 @@ auto t_hello_app::idle() -> void {
   }
 }
 
+t_hello_app *t_hello_app::app = nullptr;
 auto main() -> int {
   t_hello_app hello_world;
+  t_hello_app::app = &hello_world;
   hello_world.run();
+  t_hello_app::app = nullptr;
   return 0;
 }

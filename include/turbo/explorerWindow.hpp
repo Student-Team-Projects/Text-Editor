@@ -10,7 +10,8 @@ class t_explorer_outline : public TOutline {
   public:
   t_explorer_outline(const TRect &bounds, TScrollBar *hsb, TScrollBar *vsb,
                      const std::string_view &path);
-  auto focused(int idx) -> void override;
+  auto adjust(TNode *node, bool expand) -> void override;
+  auto selected(int idx) -> void override;
 
   private:
   auto get_current_node() -> TNode *;
@@ -22,7 +23,10 @@ class t_explorer_outline : public TOutline {
 class t_explorer_window : public TWindow {
   public:
   t_explorer_window(const TRect &bounds, const std::string_view &path);
+  auto close() -> void override;
+  auto toggle_tree() -> void;
 
   private:
   t_explorer_outline *m_outline;
+  bool m_tree_visible = true;
 };
