@@ -14,7 +14,9 @@
 #define Uses_TStatusItem
 #define Uses_TStatusDef
 #define Uses_TDeskTop
+#define Uses_TScrollBar
 #include <turbo/clockView.hpp>
+#include <turbo/explorerWindow.hpp>
 #include <tvision/tv.h>
 
 const int greet_them_cmd = 100;
@@ -31,4 +33,5 @@ class t_hello_app : public TApplication {
   private:
   static void greeting_box();
   t_clock_view *m_clock;
+  t_explorer_window *m_explorer;
 };

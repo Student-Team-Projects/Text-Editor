@@ -1,15 +1,37 @@
+#include <filesystem>
 #include <turbo/app.hpp>
 #include <turbo/clockView.hpp>
+
+#include <iostream>
+#include <unistd.h>
 
 t_hello_app::t_hello_app()
     : TProgInit(&t_hello_app::initStatusLine, &t_hello_app::initMenuBar,
                 &t_hello_app::initDeskTop) {
-  TRect rect = getExtent();
-  rect.a.x = rect.b.x - t_clock_view::time_size;
-  rect.b.y = rect.a.y + 1;
-  m_clock = new t_clock_view(rect);
-  m_clock->growMode = gfGrowLoX | gfGrowHiX;
-  insert(m_clock);
+  {
+    TRect rect = getExtent();
+    rect.a.x = rect.b.x - t_clock_view::time_size;
+    rect.b.y = rect.a.y + 1;
+    m_clock = new t_clock_view(rect);
+    m_clock->growMode = gfGrowLoX | gfGrowHiX;
+    insert(m_clock);
+  }
+  {
+    TRect rect = deskTop->getExtent();
+    if (rect.b.x > 22) {
+      rect.a.x = rect.b.x - min(max(rect.b.x - 82, 22), 30);
+    }
+    auto current_path = std::filesystem::current_path().string();
+
+    m_explorer = new t_explorer_window(rect, current_path);
+    m_explorer->flags &= ~wfZoom;
+    m_explorer->growMode = gfGrowLoX | gfGrowHiX | gfGrowHiY;
+    m_explorer->setState(sfShadow, false);
+    deskTop->insert(m_explorer);
+    if (deskTop->size.x - m_explorer->size.x < 82) {
+      m_explorer->hide();
+    }
+  }
 }
 
 void t_hello_app::greeting_box() {
