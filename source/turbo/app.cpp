@@ -23,7 +23,7 @@ t_hello_app::t_hello_app()
       rect.b.x = rect.b.x - rect.a.x;
       rect.a.x = 0;
     }
-    auto current_path = std::filesystem::current_path().string();
+    auto current_path = std::filesystem::current_path().string() + '/';
 
     m_explorer = new t_explorer_window(rect, current_path);
     m_explorer->flags &= ~wfZoom;
