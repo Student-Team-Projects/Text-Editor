@@ -1,8 +1,8 @@
 #pragma once
 
-#include <cassert>
 #include <efsw/efsw.hpp>
 #include <functional>
+#include <map>
 #include <utility>
 
 class tc_file_watcher {
@@ -12,8 +12,8 @@ class tc_file_watcher {
 
   public:
   explicit tc_file_watcher(const t_callback &callback);
-  auto add_watch(const std::string &path) -> efsw::WatchID;
-  auto remove_watch(const efsw::WatchID &watch_id) -> void;
+  auto add_watch(const std::string &path) -> size_t;
+  auto remove_watch(const size_t &watch_id) -> void;
 
   private:
   class m_update_listener : public efsw::FileWatchListener {
@@ -29,6 +29,7 @@ private:
     t_callback m_callback;
   };
   t_callback m_callback;
+  std::map<size_t, efsw::FileWatcher> m_watchers;
   m_update_listener *m_listener;
-  efsw::FileWatcher *m_watcher;
+  size_t m_watch_id;
 };

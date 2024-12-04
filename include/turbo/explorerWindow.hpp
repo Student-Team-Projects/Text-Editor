@@ -21,12 +21,11 @@ class t_explorer_outline : public TOutline {
   auto file_delete(const std::string &dir, const std::string &filename) -> void;
   auto file_move(const std::string &dir, const std::string &filename,
                  const std::string &old_filename) -> void;
-  auto renew_subtree(TNode *cur_node, TNode *new_node, const std::string &path) -> void;
   auto get_current_node() -> TNode *;
   auto populate_directory(const std::string &path) -> void;
   auto generate_children() -> void;
   std::map<TNode *, TNode *> m_parent_nodes;
-  std::map<TNode *, efsw::WatchID> m_watch_ids;
+  std::map<TNode *, size_t> m_watch_ids;
   std::string m_root_path;
   tc_file_watcher m_watcher;
 };

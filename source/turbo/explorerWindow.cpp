@@ -81,13 +81,12 @@ auto t_explorer_outline::path_to_node(const std::string &path) -> TNode * {
     auto pos = work_path.find('/');
     auto part = work_path.substr(0, pos);
     work_path = work_path.substr(pos + 1);
-    auto *tmp = node->childList;
-    while (tmp != nullptr) {
-      if (tmp->text == part) {
-        node = tmp;
-        break;
-      }
-      tmp = tmp->next;
+    node = node->childList;
+    while (node != nullptr and node->text != part) {
+      node = node->next;
+    }
+    if (node == nullptr) {
+      return node;
     }
   }
   return node;
@@ -95,12 +94,13 @@ auto t_explorer_outline::path_to_node(const std::string &path) -> TNode * {
 auto t_explorer_outline::file_add(const std::string &dir, const std::string &filename)
     -> void {
   auto *dir_node = path_to_node(dir);
+  if (dir_node == nullptr) {
+    return;
+  }
   auto *node = new TNode(filename);
   node->expanded = false;
   if (std::filesystem::is_directory(dir + filename)) {
     node->childList = node;
-    auto watch_id = m_watcher.add_watch(dir + filename);
-    m_watch_ids[node] = watch_id;
   }
   m_parent_nodes[node] = dir_node;
 
@@ -119,6 +119,9 @@ auto t_explorer_outline::file_delete(const std::string &dir, const std::string &
     -> void {
   auto *dir_node = path_to_node(dir);
   auto *my_node = path_to_node(dir + filename + '/');
+  if (my_node == nullptr) {
+    return;
+  }
   auto *tmp = dir_node->childList;
   if (tmp == my_node) {
     dir_node->childList = my_node->next;
@@ -135,54 +138,16 @@ auto t_explorer_outline::file_delete(const std::string &dir, const std::string &
     m_watch_ids.erase(my_node);
   }
   m_parent_nodes.erase(my_node);
+  while (my_node->childList != nullptr) {
+    auto *child = my_node->childList;
+    file_delete(dir + filename + '/', child->text);
+  }
   delete my_node;
-}
-auto t_explorer_outline::renew_subtree(TNode *cur_node, TNode *new_node,
-                                       const std::string &path) -> void {
-  if (cur_node == nullptr) {
-    return;
-  }
-  if (m_watch_ids.contains(cur_node)) {
-    auto watch_id = m_watch_ids[cur_node];
-    m_watcher.remove_watch(watch_id);
-    m_watch_ids.erase(cur_node);
-
-    watch_id = m_watcher.add_watch(path + cur_node->text);
-    m_watch_ids[new_node] = watch_id;
-    renew_subtree(cur_node->childList, new_node, path + cur_node->text + '/');
-  }
 }
 auto t_explorer_outline::file_move(const std::string &dir, const std::string &filename,
                                    const std::string &old_filename) -> void {
-  auto *dir_node = path_to_node(dir);
-  auto *old_node = path_to_node(dir + old_filename + '/');
-  auto *new_node = new TNode(filename);
-  new_node->expanded = old_node->expanded;
-  if (m_watch_ids.contains(old_node)) {
-    if (old_node->childList == old_node) {
-      old_node->childList = nullptr;
-      new_node->childList = new_node;
-    }
-    renew_subtree(old_node->childList, new_node, dir + filename + '/');
-    for (auto *child = old_node->childList; child != nullptr; child = child->next) {
-      m_parent_nodes[child] = new_node;
-    }
-    auto new_watch_id = m_watcher.add_watch(dir + filename);
-    m_watch_ids[new_node] = new_watch_id;
-    new_node->childList = old_node->childList;
-  }
   file_delete(dir, old_filename);
-  m_parent_nodes[new_node] = dir_node;
-  auto *tmp = dir_node->childList;
-  if (tmp == nullptr) {
-    dir_node->childList = new_node;
-  } else {
-    while (tmp->next != nullptr && tmp->next->text < filename) {
-      tmp = tmp->next;
-    }
-    new_node->next = tmp->next;
-    tmp->next = new_node;
-  }
+  file_add(dir, filename);
 }
 auto t_explorer_outline::generate_children() -> void {
   auto *node = get_current_node();
@@ -190,6 +155,8 @@ auto t_explorer_outline::generate_children() -> void {
     auto path = node_to_path(node);
     node->childList = nullptr;
     populate_directory(path);
+    auto watch_id = m_watcher.add_watch(path);
+    m_watch_ids[node] = watch_id;
   }
 }
 
