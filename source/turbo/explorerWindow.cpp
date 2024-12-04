@@ -4,8 +4,6 @@
 #include <turbo/explorerWindow.hpp>
 #include <tvision/tv.h>
 
-#include <debug.hpp>
-
 t_explorer_outline::t_explorer_outline(const TRect &bounds, TScrollBar *hsb,
                                        TScrollBar *vsb, const std::string &path)
     : TOutline(bounds, hsb, vsb, nullptr), m_root_path(path),
@@ -96,7 +94,6 @@ auto t_explorer_outline::path_to_node(const std::string &path) -> TNode * {
 }
 auto t_explorer_outline::file_add(const std::string &dir, const std::string &filename)
     -> void {
-  debug("add", dir, filename);
   auto *dir_node = path_to_node(dir);
   auto *node = new TNode(filename);
   node->expanded = false;
@@ -120,7 +117,6 @@ auto t_explorer_outline::file_add(const std::string &dir, const std::string &fil
 }
 auto t_explorer_outline::file_delete(const std::string &dir, const std::string &filename)
     -> void {
-  debug("rm", dir, filename);
   auto *dir_node = path_to_node(dir);
   auto *my_node = path_to_node(dir + filename + '/');
   auto *tmp = dir_node->childList;
@@ -158,7 +154,6 @@ auto t_explorer_outline::renew_subtree(TNode *cur_node, TNode *new_node,
 }
 auto t_explorer_outline::file_move(const std::string &dir, const std::string &filename,
                                    const std::string &old_filename) -> void {
-  debug("mv", dir, filename, old_filename);
   auto *dir_node = path_to_node(dir);
   auto *old_node = path_to_node(dir + old_filename + '/');
   auto *new_node = new TNode(filename);
