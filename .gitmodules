@@ -1,3 +1,6 @@
 [submodule "deps/tvision"]
 	path = deps/tvision
 	url = git@github.com:magiblot/tvision.git
+[submodule "deps/efsw"]
+	path = deps/efsw
+	url = https://github.com/SpartanJ/efsw

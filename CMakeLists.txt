@@ -30,6 +30,7 @@ target_include_directories(turbo-core PRIVATE
 )
 target_link_libraries(turbo-core PUBLIC
     tvision
+    efsw
 )
 
 # Target 'turbo'
