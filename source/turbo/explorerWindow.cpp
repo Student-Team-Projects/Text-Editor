@@ -122,6 +122,13 @@ auto t_explorer_outline::file_delete(const std::string &dir, const std::string &
   if (my_node == nullptr) {
     return;
   }
+  while (my_node->childList != nullptr) {
+    auto *child = my_node->childList;
+    if (child == my_node) {
+      break;
+    }
+    file_delete(dir + filename + '/', child->text);
+  }
   auto *tmp = dir_node->childList;
   if (tmp == my_node) {
     dir_node->childList = my_node->next;
@@ -138,10 +145,6 @@ auto t_explorer_outline::file_delete(const std::string &dir, const std::string &
     m_watch_ids.erase(my_node);
   }
   m_parent_nodes.erase(my_node);
-  while (my_node->childList != nullptr) {
-    auto *child = my_node->childList;
-    file_delete(dir + filename + '/', child->text);
-  }
   delete my_node;
 }
 auto t_explorer_outline::file_move(const std::string &dir, const std::string &filename,
