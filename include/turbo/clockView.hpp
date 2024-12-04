@@ -10,8 +10,8 @@ class t_clock_view : public TView {
   static const int time_size = (2 + 1) + (2 + 1) + (2) + 1;
 
   explicit t_clock_view(TRect &rect);
-  void draw() override;
-  virtual void update();
+  auto draw() -> void override;
+  auto update() -> void;
 
   private:
   std::string m_last_time;
