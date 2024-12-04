@@ -12,7 +12,7 @@ jobs:
     # The CMake configure and build commands are platform agnostic and should work equally well on Windows or Mac.
     # You can convert this to a matrix build if you need cross-platform coverage.
     # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
-    name: Linux (GCC 8)
+    name: Linux (GCC 10)
     runs-on: ubuntu-20.04
 
     steps:
@@ -26,14 +26,14 @@ jobs:
           deb http://us.archive.ubuntu.com/ubuntu/ bionic universe
         EOF
         sudo apt -y update
-        sudo apt -y install libncursesw5-dev g++-8 libgtest-dev
+        sudo apt -y install libncursesw5-dev g++-10 libgtest-dev ninja-build
 
     - name: Configure CMake
       shell: bash
       env:
-        CC: gcc-8
-        CXX: g++-8
-      run: cmake . -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+        CC: gcc-10
+        CXX: g++-10
+      run: cmake . -DCMAKE_BUILD_TYPE=$BUILD_TYPE -G Ninja
 
     - name: Build
       shell: bash
@@ -47,9 +47,13 @@ jobs:
       with:
         submodules: 'recursive'
 
+    - name: Install Dependencies
+      run: |
+        brew install ninja
+
     - name: Configure CMake
       shell: bash
-      run: cmake . -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+      run: cmake . -DCMAKE_BUILD_TYPE=$BUILD_TYPE -G Ninja
 
     - name: Build
       shell: bash

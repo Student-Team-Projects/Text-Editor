@@ -23,8 +23,8 @@ class t_hello_app : public TApplication {
   public:
   t_hello_app();
 
-  void handleEvent(TEvent &event) override;
-  void idle() override;
+  auto handleEvent(TEvent &event) -> void override;
+  auto idle() -> void override;
   static auto initMenuBar(TRect rect) -> TMenuBar *;
   static auto initStatusLine(TRect rect) -> TStatusLine *;
 

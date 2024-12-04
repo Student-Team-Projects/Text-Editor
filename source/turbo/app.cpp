@@ -25,7 +25,7 @@ void t_hello_app::greeting_box() {
   destroy(dialog);
 }
 
-void t_hello_app::handleEvent(TEvent &event) {
+auto t_hello_app::handleEvent(TEvent &event) -> void {
   TApplication::handleEvent(event);
   if (event.what == evCommand) {
     switch (event.message.command) {

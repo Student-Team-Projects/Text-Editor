@@ -10,7 +10,7 @@ t_clock_view::t_clock_view(TRect &rect) : TView(rect) {
   m_cur_time = std::string(t_clock_view::time_size, ' ');
 }
 
-void t_clock_view::draw() {
+auto t_clock_view::draw() -> void {
   TDrawBuffer buf;
   auto col = getColor(2);
 
@@ -19,7 +19,7 @@ void t_clock_view::draw() {
   writeLine(0, 0, static_cast<int16_t>(size.x), 1, buf);
 }
 
-void t_clock_view::update() {
+auto t_clock_view::update() -> void {
   auto now = std::chrono::system_clock::now();
   auto cur_t = std::chrono::system_clock::to_time_t(now);
   auto *ptm = std::localtime(&cur_t);
