@@ -15,17 +15,23 @@ class t_explorer_outline : public TOutline {
   auto selected(int idx) -> void override;
 
   private:
+  auto get_watcher(TNode *node)
+      -> std::function<void(efsw::WatchID, const std::string &, const std::string &,
+                            efsw::Action, const std::string &)>;
+  auto set_watcher(TNode *node) -> void;
+  auto erase_watcher(TNode *node) -> void;
   auto node_to_path(TNode *node) -> std::string;
-  auto path_to_node(const std::string &path) -> TNode *;
-  auto file_add(const std::string &dir, const std::string &filename) -> void;
-  auto file_delete(const std::string &dir, const std::string &filename) -> void;
-  auto file_move(const std::string &dir, const std::string &filename,
-                 const std::string &old_filename) -> void;
-  auto get_current_node() -> TNode *;
-  auto populate_directory(const std::string &path) -> void;
+  static auto insert_node(TNode *node, TNode *new_node) -> void;
+  static auto erase_node(TNode *node, const std::string &filename) -> TNode *;
+  auto file_add(TNode *node, const std::string &filename) -> void;
+  auto file_delete(TNode *node, const std::string &filename) -> void;
+  auto file_move(TNode *node, const std::string &filename, const std::string &old_filename)
+      -> void;
+  auto get_focused() -> TNode *;
+  auto populate_directory(TNode *node) -> void;
   auto generate_children() -> void;
   std::map<TNode *, TNode *> m_parent_nodes;
-  std::map<TNode *, size_t> m_watch_ids;
+  std::map<TNode *, efsw::WatchID> m_watch_ids;
   std::string m_root_path;
   tc_file_watcher m_watcher;
 };

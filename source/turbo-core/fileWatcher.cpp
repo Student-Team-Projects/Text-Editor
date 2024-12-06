@@ -1,20 +1,19 @@
-#include <cstddef>
 #include <efsw/efsw.hpp>
-#include <functional>
 #include <string>
 #include <turbo-core/fileWatcher.hpp>
 
-tc_file_watcher::tc_file_watcher(
-    const std::function<void(efsw::WatchID, const std::string &, const std::string &,
-                             efsw::Action, const std::string &)> &callback)
-    : m_listener(new m_update_listener(callback)), m_watch_id(0) {}
-
-auto tc_file_watcher::add_watch(const std::string &path) -> size_t {
-  m_watchers[m_watch_id].addWatch(path, m_listener);
-  m_watchers[m_watch_id].watch();
-  return m_watch_id++;
+tc_file_watcher::tc_file_watcher() : m_watcher(new efsw::FileWatcher()) {
+  m_watcher->watch();
 }
 
-auto tc_file_watcher::remove_watch(const size_t &watch_id) -> void {
-  m_watchers.erase(watch_id);
+auto tc_file_watcher::add_watcher(const std::string &path, const t_callback &callback)
+    -> efsw::WatchID {
+  auto *listener = new m_update_listener(callback);
+  auto watch_id = m_watcher->addWatch(path, listener, /*recursive=*/false);
+  m_listeners[watch_id] = listener;
+  return watch_id;
+}
+
+auto tc_file_watcher::remove_watcher(const efsw::WatchID &watch_id) -> void {
+  m_listeners.erase(watch_id);
 }

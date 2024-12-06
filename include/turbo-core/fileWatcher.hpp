@@ -11,9 +11,9 @@ class tc_file_watcher {
                          efsw::Action, const std::string &)>;
 
   public:
-  explicit tc_file_watcher(const t_callback &callback);
-  auto add_watch(const std::string &path) -> size_t;
-  auto remove_watch(const size_t &watch_id) -> void;
+  tc_file_watcher();
+  auto add_watcher(const std::string &path, const t_callback &callback) -> efsw::WatchID;
+  auto remove_watcher(const efsw::WatchID &watch_id) -> void;
 
   private:
   class m_update_listener : public efsw::FileWatchListener {
@@ -28,8 +28,6 @@ public:
 private:
     t_callback m_callback;
   };
-  t_callback m_callback;
-  std::map<size_t, efsw::FileWatcher> m_watchers;
-  m_update_listener *m_listener;
-  size_t m_watch_id;
+  efsw::FileWatcher *m_watcher;
+  std::map<efsw::WatchID, m_update_listener *> m_listeners;
 };
