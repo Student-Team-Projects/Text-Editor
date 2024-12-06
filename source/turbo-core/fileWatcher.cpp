@@ -15,5 +15,6 @@ auto tc_file_watcher::add_watcher(const std::string &path, const t_callback &cal
 }
 
 auto tc_file_watcher::remove_watcher(const efsw::WatchID &watch_id) -> void {
+  m_watcher->removeWatch(watch_id);
   m_listeners.erase(watch_id);
 }

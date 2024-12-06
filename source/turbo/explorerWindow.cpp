@@ -28,6 +28,7 @@ auto t_explorer_outline::adjust(TNode *node, bool expand) -> void {
   TOutline::adjust(node, expand);
   if (not node->expanded and node->childList == nullptr and
       m_watch_ids.contains(node) /* is a directory */) {
+    erase_watcher(node);
     node->childList = node;
   }
   update();
@@ -46,6 +47,7 @@ auto t_explorer_outline::erase_watcher(TNode *node) -> void {
   assert(m_watch_ids.contains(node));
   m_watcher.remove_watcher(m_watch_ids[node]);
   m_watch_ids.erase(node);
+  debug("erase_watcher", node->text);
 }
 auto t_explorer_outline::get_watcher(TNode *node)
     -> std::function<void(efsw::WatchID, const std::string &, const std::string &,
@@ -112,7 +114,10 @@ auto t_explorer_outline::insert_node(TNode *node, TNode *new_node) -> void {
   }
 }
 auto t_explorer_outline::erase_node(TNode *node, const std::string &filename) -> TNode * {
-  assert(node->childList != nullptr and node->childList != node);
+  if (node->childList == nullptr or
+      node->childList == node) { // can happen due to weird behaviour of moving
+    return nullptr;
+  }
   TNode *erase_node = nullptr;
   if (node->childList->text == filename) {
     erase_node = node->childList;
@@ -142,8 +147,14 @@ auto t_explorer_outline::file_add(TNode *node, const std::string &filename) -> v
 auto t_explorer_outline::file_delete(TNode *node, const std::string &filename) -> void {
   debug("-", node->text, filename);
   auto *erased_node = erase_node(node, filename);
-  assert(erased_node != nullptr);
-  assert(erased_node->childList == nullptr or erased_node->childList == erased_node);
+  if (erased_node == nullptr) { // can happen due to weird behaviour of moving
+    return;
+  }
+  if (erased_node->childList != erased_node) {
+    while (erased_node->childList != nullptr) {
+      file_delete(erased_node, erased_node->childList->text);
+    }
+  }
   m_parent_nodes.erase(erased_node);
   if (m_watch_ids.contains(erased_node)) {
     erase_watcher(erased_node);
@@ -152,7 +163,12 @@ auto t_explorer_outline::file_delete(TNode *node, const std::string &filename) -
 }
 auto t_explorer_outline::file_move(TNode *node, const std::string &filename,
                                    const std::string &old_filename) -> void {
-  debug(">", node->text, old_filename, "->", filename);
+  if (old_filename == filename) {
+    file_add(node, filename);
+  } else {
+    file_delete(node, old_filename);
+    file_add(node, filename);
+  }
 }
 auto t_explorer_outline::generate_children() -> void {
   auto *node = get_focused();
