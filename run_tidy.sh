@@ -1,0 +1,1 @@
+python3 tidy.py source/ -p build -config-file .clang-tidy -use-color
