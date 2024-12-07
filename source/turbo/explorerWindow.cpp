@@ -76,9 +76,8 @@ auto t_explorer_outline::get_watcher(TNode *node)
 auto t_explorer_outline::populate_directory(TNode *node) -> void {
   auto path = node_to_path(node);
   std::vector<std::filesystem::directory_entry> entries;
-  for (const auto &entry : std::filesystem::directory_iterator(path)) {
-    entries.emplace_back(entry);
-  }
+  std::copy(begin(std::filesystem::directory_iterator(path)),
+            end(std::filesystem::directory_iterator(path)), std::back_inserter(entries));
   std::ranges::sort(entries, [](const auto &lhs, const auto &rhs) {
     return lhs.path().filename().string() < rhs.path().filename().string();
   });

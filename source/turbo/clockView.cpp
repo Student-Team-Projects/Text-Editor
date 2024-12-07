@@ -22,7 +22,7 @@ auto t_clock_view::draw() -> void {
 auto t_clock_view::update() -> void {
   auto now = std::chrono::system_clock::now();
   auto cur_t = std::chrono::system_clock::to_time_t(now);
-  auto *ptm = std::localtime(&cur_t);
+  const auto *ptm = std::localtime(&cur_t);
 
   auto result =
       std::strftime(m_cur_time.data(), t_clock_view::time_size, time_format.data(), ptm);
