@@ -63,6 +63,11 @@ auto t_hello_app::handleEvent(TEvent &event) -> void {
       break;
     default:
       break;
+    case open_file_in_editor:
+      auto file = m_explorer->get_selesced_path();
+      m_editor = new editor(deskTop->getExtent(), file);
+      deskTop->insert(m_editor);
+      break;
     }
   }
 }
@@ -73,6 +78,8 @@ auto t_hello_app::initMenuBar(TRect rect) -> TMenuBar * {
       rect, *new TSubMenu("~H~ello", kbAltH) +
                 *new TMenuItem("~G~reeting...", greet_them_cmd, kbAltG) + newLine() +
                 *new TMenuItem("~T~oggle tree", cm_toggle_tree, kbF9, hcNoContext, "F9") +
+                *new TMenuItem("Open in editor", open_file_in_editor, 0, hcNoContext,
+                               "~nicolas cage~") +
                 *new TMenuItem("E~x~it", cmQuit, cmQuit, hcNoContext, "Alt-X"));
 }
 

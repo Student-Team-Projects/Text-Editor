@@ -14,6 +14,9 @@ class t_explorer_outline : public TOutline {
   auto adjust(TNode *node, bool expand) -> void override;
   auto selected(int idx) -> void override;
 
+  // TODO
+  auto get_selesced_path() -> std::string { return node_to_path(get_focused()); }
+
   private:
   auto get_watcher(TNode *node)
       -> std::function<void(efsw::WatchID, const std::string &, const std::string &,
@@ -25,8 +28,8 @@ class t_explorer_outline : public TOutline {
   static auto erase_node(TNode *node, const std::string &filename) -> TNode *;
   auto file_add(TNode *node, const std::string &filename) -> void;
   auto file_delete(TNode *node, const std::string &filename) -> void;
-  auto file_move(TNode *node, const std::string &filename, const std::string &old_filename)
-      -> void;
+  auto file_move(TNode *node, const std::string &filename,
+                 const std::string &old_filename) -> void;
   auto get_focused() -> TNode *;
   auto populate_directory(TNode *node) -> void;
   auto generate_children() -> void;
@@ -41,6 +44,8 @@ class t_explorer_window : public TWindow {
   t_explorer_window(const TRect &bounds, const std::string &path);
   auto close() -> void override;
   auto toggle_tree() -> void;
+  // TODO
+  auto get_selesced_path() -> std::string { return m_outline->get_selesced_path(); }
 
   private:
   t_explorer_outline *m_outline;

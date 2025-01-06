@@ -1,5 +1,6 @@
 #pragma once
 
+#include "turbo/editor.hpp"
 #define Uses_TKeys
 #define Uses_TApplication
 #define Uses_TEvent
@@ -21,6 +22,7 @@
 
 const int greet_them_cmd = 100;
 const int cm_toggle_tree = 101;
+const int open_file_in_editor = 102;
 
 class t_hello_app : public TApplication {
   public:
@@ -36,4 +38,5 @@ class t_hello_app : public TApplication {
   static void greeting_box();
   t_clock_view *m_clock;
   t_explorer_window *m_explorer;
+  editor *m_editor;
 };
