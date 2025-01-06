@@ -19,6 +19,7 @@ add_library(turbo-core
     ${TURBO_CORE_SRC}
 )
 
+
 target_compile_features(turbo-core PRIVATE cxx_std_20)
 turbo_set_warnings(turbo-core)
 target_include_directories(turbo-core PUBLIC
@@ -41,4 +42,5 @@ target_compile_features(turbo PRIVATE cxx_std_20)
 turbo_set_warnings(turbo)
 target_link_libraries(turbo PRIVATE
     turbo-core
+    tvterm-core
 )

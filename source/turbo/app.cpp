@@ -1,9 +1,28 @@
+#include "turbo/terminal.hpp"
+#include "tvterm/termwnd.h"
 #include <algorithm>
 #include <filesystem>
 #include <turbo/app.hpp>
 #include <turbo/clockView.hpp>
 #include <turbo/explorerWindow.hpp>
 #include <tvision/tv.h>
+#include <tvterm/termctrl.h>
+#include <tvterm/vtermemu.h>
+#include <tvterm/consts.h>
+
+static void onTermError(const char *reason) {
+    //unimplemented!
+}
+
+const tvterm::TVTermConstants term_coms =
+{
+    cmCheckTerminalUpdates,
+    cmTerminalUpdated,
+    cmGrabInput,
+    cmReleaseInput,
+    hcInputGrabbed,
+};
+
 
 t_hello_app::t_hello_app()
     : TProgInit(&t_hello_app::initStatusLine, &t_hello_app::initMenuBar,
@@ -34,6 +53,17 @@ t_hello_app::t_hello_app()
       m_explorer->hide();
     }
   }
+
+  {
+    using namespace tvterm;
+   
+    TRect r = deskTop->getExtent();
+    VTermEmulatorFactory factory;
+    auto *termCtrl = TerminalController::create( BasicTerminalWindow::viewSize(r),
+                                                 factory, onTermError );
+    if (termCtrl)
+        insertWindow(new BasicTerminalWindow(r, *termCtrl, term_coms));
+  }
 }
 
 void t_hello_app::greeting_box() {
@@ -61,6 +91,9 @@ auto t_hello_app::handleEvent(TEvent &event) -> void {
       m_explorer->toggle_tree();
       clearEvent(event);
       break;
+    case cm_toggle_term:
+      clearEvent(event);
+      break;
     default:
       break;
     }
@@ -72,7 +105,8 @@ auto t_hello_app::initMenuBar(TRect rect) -> TMenuBar * {
   return new TMenuBar(
       rect, *new TSubMenu("~H~ello", kbAltH) +
                 *new TMenuItem("~G~reeting...", greet_them_cmd, kbAltG) + newLine() +
-                *new TMenuItem("~T~oggle tree", cm_toggle_tree, kbF9, hcNoContext, "F9") +
+                *new TMenuItem("~T~erminal...", cmGrabInput, kbAltT) + newLine() +
+                *new TMenuItem("~T~oggle tree", cm_toggle_term, kbF9, hcNoContext, "F9") +
                 *new TMenuItem("E~x~it", cmQuit, cmQuit, hcNoContext, "Alt-X"));
 }
 
@@ -88,6 +122,7 @@ auto t_hello_app::idle() -> void {
   if (m_clock != nullptr) {
     m_clock->update();
   }
+  message(this, evBroadcast, cmCheckTerminalUpdates, nullptr);
 }
 
 t_hello_app *t_hello_app::app = nullptr;
