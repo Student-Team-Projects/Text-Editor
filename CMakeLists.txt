@@ -33,6 +33,21 @@ target_link_libraries(turbo-core PUBLIC
     efsw
 )
 
+# Target 'scintilla'
+file(GLOB_RECURSE SCINTILLA_SRC "${CMAKE_CURRENT_LIST_DIR}/source/scintilla/*.cxx")
+add_library(scintilla
+    ${SCINTILLA_SRC}
+)
+target_compile_features(scintilla PRIVATE cxx_std_17)
+# turbo_set_warnings(scintilla)
+target_include_directories(scintilla PUBLIC
+    "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/scintilla>"
+    "$<INSTALL_INTERFACE:include/scintilla>"
+)
+target_include_directories(scintilla PRIVATE
+    "${CMAKE_CURRENT_LIST_DIR}/source/scintilla"
+)
+
 # Target 'turbo'
 
 file(GLOB_RECURSE TURBO_SRC "${CMAKE_CURRENT_LIST_DIR}/source/turbo/*.cpp")
@@ -41,4 +56,5 @@ target_compile_features(turbo PRIVATE cxx_std_20)
 turbo_set_warnings(turbo)
 target_link_libraries(turbo PRIVATE
     turbo-core
+    scintilla
 )
