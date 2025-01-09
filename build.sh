@@ -1,5 +1,6 @@
 mkdir build
 cd build
-cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=1 .. -DCMAKE_BUILD_TYPE=Debug -G Ninja
+#cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=1 .. -DCMAKE_BUILD_TYPE=Debug -G Ninja
+cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=1 .. -G Ninja
 cmake --build .
 cd ..

@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.16)
-
+add_definitions(-w)
 project (turbo)
 
 function(turbo_set_warnings t)
@@ -38,13 +38,13 @@ file(GLOB_RECURSE SCINTILLA_SRC "${CMAKE_CURRENT_LIST_DIR}/source/scintilla/*.cx
 add_library(scintilla
     ${SCINTILLA_SRC}
 )
-target_compile_features(scintilla PRIVATE cxx_std_17)
+target_compile_features(scintilla PUBLIC cxx_std_17)
 # turbo_set_warnings(scintilla)
 target_include_directories(scintilla PUBLIC
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/scintilla>"
     "$<INSTALL_INTERFACE:include/scintilla>"
 )
-target_include_directories(scintilla PRIVATE
+target_include_directories(scintilla PUBLIC
     "${CMAKE_CURRENT_LIST_DIR}/source/scintilla"
 )
 
