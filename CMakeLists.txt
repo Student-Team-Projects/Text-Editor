@@ -4,7 +4,7 @@ project (turbo)
 
 function(turbo_set_warnings t)
     target_compile_options(${t} PRIVATE
-        -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Wcast-qual -Wformat=2 -Wundef -g -D_GLIBCXX_DEBUG
+        -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Wcast-qual -Wformat=2 -Wundef -g -D_GLIBCXX_DEBUG -I/usr/include/glib-2.0 -I/usr/include/glib-2.0/glib -I/usr/lib/i386-linux-gnu/glib-2.0/include  -lglib-2.0  
     )
 endfunction()
 
@@ -45,7 +45,7 @@ target_include_directories(scintilla PUBLIC
     "$<INSTALL_INTERFACE:include/scintilla>"
 )
 target_include_directories(scintilla PUBLIC
-    "${CMAKE_CURRENT_LIST_DIR}/source/scintilla"
+    "${CMAKE_CURRENT_LIST_DIR}/source/scintilla/*.cxx"
 )
 
 # Target 'turbo'

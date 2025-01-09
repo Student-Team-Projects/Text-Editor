@@ -41,10 +41,11 @@ class NicolasCage : public Internal::ScintillaBase {
   bool HaveMouseCapture() override { return false; }
 
   protected:
-  std::string UTF8FromEncoded(std::string_view encoded) override;
-  // virtual std::string EncodedFromUTF8(std::string_view utf8) const = 0;
+  std::string UTF8FromEncoded(std::string_view encoded) const override {};
+  std::string EncodedFromUTF8(std::string_view utf8) const override {};
 
-  Scintilla::sptr_t DefWndProc(Scintilla::Message iMessage, uptr_t wParam, sptr_t lParam) {}
+  Scintilla::sptr_t DefWndProc(Scintilla::Message iMessage, uptr_t wParam,
+                               sptr_t lParam) override {}
 
   public:
   std::string act() {
@@ -138,8 +139,8 @@ void editor_interior::draw() // modified for scroller
     writeLine(0, i, size.x, 1, b);
   }
 
-  // let nick = NicolasCage();
-  let line = new Scintilla::NicolasCage();
+  let nick = Scintilla::NicolasCage();
+  // let line = new Scintilla::NicolasCage();
   // writeLine(0, lineCount, size.x, size.y - lineCount, b);
 }
 
