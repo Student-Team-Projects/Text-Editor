@@ -1,8 +1,8 @@
 #include <algorithm>
 #include <cassert>
 #include <cstring>
-//#include <debug.hpp>
-//#include <efsw/efsw.hpp>
+// #include <debug.hpp>
+// #include <efsw/efsw.hpp>
 #include <filesystem>
 #include <fstream>
 #include <functional>
@@ -13,6 +13,7 @@
 #include <tvision/tv.h>
 #include <tvision/util.h>
 #include <vector>
+#include <iostream>
 
 #include <turbo/nicolas_cage.h>
 #define Uses_IfStreamGetLine
@@ -29,7 +30,27 @@ editor::editor(const TRect &bounds, std::string text)
   r.grow(-1, -1);          // shrink to fit inside window frame
   m_interior = new editor_interior(r, hScrollBar, vScrollBar);
   m_interior->m_text = text;
+
   insert(m_interior);
+}
+void editor::handleEvent(TEvent &event) {
+  if (event.what == evKeyDown) {
+
+    // std::cout << "editor::handleEvent: " << event.keyDown.keyCode << std::endl;
+    if (event.keyDown.keyCode == 7181) {
+      // 7181
+      m_interior->m_nick->insert_char('\n');
+    }
+    if (event.keyDown.keyCode == kbBack) {
+      m_interior->m_nick->delete_char();
+    }
+    for (auto ch : event.keyDown.getText()) {
+      if (isprint(ch)) m_interior->m_nick->insert_char(ch);
+      // if (ch == '\n') m_interior->m_nick->insert_char('\n');
+    }
+  }
+  // std::cout << "editor::handleEvent: " << event.what << std::endl;
+  m_interior->draw();
 }
 
 editor_interior::editor_interior(const TRect &bounds, TScrollBar *aHScrollBar,
@@ -37,11 +58,28 @@ editor_interior::editor_interior(const TRect &bounds, TScrollBar *aHScrollBar,
     : TScroller(bounds, aHScrollBar, aVScrollBar) {
   growMode = gfGrowHiX | gfGrowHiY;
   options = options | ofFramed;
+  m_nick = new NicolasCage();
+  m_nick->new_file();
   // setLimit(maxLineLength, maxLines);
+}
+void editor_interior::handleEvent(TEvent &event) {
+  std::cout << "editor_interior::handleEvent" << std::endl;
 }
 
 void editor_interior::draw() // modified for scroller
 {
+  auto line_count = m_nick->get_line_count();
+  for (int h = 0; h < line_count; h++) {
+    TDrawBuffer b;
+    std::string line_text = m_nick->get_line(h);
+    // line_text += std::string('x', 10);
+    line_text += std::string(size.x - line_text.size(), ' ');
+
+    b.moveStr(0, line_text, getColor(0x0301));
+    writeLine(0, h, line_text.size(), 1, b);
+  }
+  return;
+
   m_text.pop_back();
   std::ifstream fileToView(m_text);
   const int maxLines = 100;
@@ -93,10 +131,10 @@ void editor_interior::draw() // modified for scroller
     writeLine(0, i, size.x, 1, b);
   }
 
-  auto nick = NicolasCage().act();
-  //auto nick = foo();
-  TDrawBuffer b;
-b.moveStr(0, nick, color);
-  writeLine(0, lineCount, size.x, 1, b);
+  // auto nick = NicolasCage().act();
+  //  auto nick = foo();
+  // TDrawBuffer b;
+  // b.moveStr(0, nick, color);
+  // writeLine(0, lineCount, size.x, 1, b);
 }
 
