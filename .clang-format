@@ -9,4 +9,5 @@ IndentCaseLabels: false
 ColumnLimit: 92
 AccessModifierOffset: -4
 BreakBeforeBraces: Attach
+SortIncludes: false
 ...

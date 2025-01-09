@@ -1,8 +1,8 @@
 #include <algorithm>
 #include <cassert>
 #include <cstring>
-#include <debug.hpp>
-#include <efsw/efsw.hpp>
+//#include <debug.hpp>
+//#include <efsw/efsw.hpp>
 #include <filesystem>
 #include <fstream>
 #include <functional>
@@ -13,6 +13,8 @@
 #include <tvision/tv.h>
 #include <tvision/util.h>
 #include <vector>
+
+#include <turbo/nicolas_cage.h>
 #define Uses_IfStreamGetLine
 
 editor::editor(const TRect &bounds, std::string text)
@@ -90,5 +92,11 @@ void editor_interior::draw() // modified for scroller
     }
     writeLine(0, i, size.x, 1, b);
   }
+
+  auto nick = NicolasCage().act();
+  //auto nick = foo();
+  TDrawBuffer b;
+b.moveStr(0, nick, color);
+  writeLine(0, lineCount, size.x, 1, b);
 }
 

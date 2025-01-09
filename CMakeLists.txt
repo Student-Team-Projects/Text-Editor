@@ -1,4 +1,5 @@
 cmake_minimum_required (VERSION 3.16)
+add_definitions(-w)#no stupid shit
 
 project (turbo)
 
@@ -33,6 +34,37 @@ target_link_libraries(turbo-core PUBLIC
     efsw
 )
 
+# Target 'scintilla'
+
+file(GLOB_RECURSE SCINTILLA_SRC 
+    "${CMAKE_CURRENT_LIST_DIR}/source/scintilla/src/*.cxx"
+    "${CMAKE_CURRENT_LIST_DIR}/source/scintilla/lexlib/*.cxx"
+    "${CMAKE_CURRENT_LIST_DIR}/source/platform/*.cc"
+    "${CMAKE_CURRENT_LIST_DIR}/source/scintilla/lexers/*.cxx"
+)
+
+add_library(scintilla OBJECT
+    ${SCINTILLA_SRC}
+)
+
+target_include_directories(scintilla PRIVATE
+    "${CMAKE_CURRENT_LIST_DIR}/include/scintilla/include"
+    "${CMAKE_CURRENT_LIST_DIR}/include/scintilla/lexlib"
+    "${CMAKE_CURRENT_LIST_DIR}/include/scintilla/src"
+    "${CMAKE_CURRENT_LIST_DIR}/include/scintilla"
+)
+
+target_compile_definitions(scintilla PRIVATE
+    CURSES
+    SCI_LEXER
+)
+target_compile_features(scintilla PRIVATE cxx_std_17)
+#target_include_directories(scintilla PUBLIC
+    #"$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include/scintilla>"
+    #"$<INSTALL_INTERFACE:include/scintilla>"
+#)
+
+
 # Target 'turbo'
 
 file(GLOB_RECURSE TURBO_SRC "${CMAKE_CURRENT_LIST_DIR}/source/turbo/*.cpp")
@@ -41,4 +73,5 @@ target_compile_features(turbo PRIVATE cxx_std_20)
 turbo_set_warnings(turbo)
 target_link_libraries(turbo PRIVATE
     turbo-core
+    scintilla
 )
