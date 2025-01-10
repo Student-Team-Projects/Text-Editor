@@ -1,6 +1,7 @@
 #pragma once
 #include "scintilla/include/Scintilla.h"
 #include "scintilla/internals.h"
+#include <array>
 #include <type_traits>
 
 namespace Scintilla {
@@ -33,6 +34,11 @@ class NicolasCage : public ScintillaBase {
   void NotifyErrorOccurred(Scintilla::Document *, void *, int) override {}
   void ListNotify(Scintilla::ListBoxEvent *) override {}
 
+  // WTF 2.0
+  bool FineTickerRunning(TickReason reason) override { return false; }
+  void FineTickerStart(TickReason reason, int millis, int tolerance) override {}
+  void FineTickerCancel(TickReason reason) override {}
+
   public:
   // additions:
   void load_file(const char *filename);
@@ -41,6 +47,9 @@ class NicolasCage : public ScintillaBase {
   std::string get_line(int line);
   void delete_char();
   int get_line_count();
+  void move_caret_h(int amount);
+  void move_caret_v(int amount);
+  std::array<int, 2> get_carret_pos();
 };
 } // namespace Scintilla
 

@@ -44,6 +44,18 @@ void editor::handleEvent(TEvent &event) {
     if (event.keyDown.keyCode == kbBack) {
       m_interior->m_nick->delete_char();
     }
+    if (event.keyDown.keyCode == kbLeft) {
+      m_interior->m_nick->move_caret_h(-1);
+    }
+    if (event.keyDown.keyCode == kbRight) {
+      m_interior->m_nick->move_caret_h(1);
+    }
+    if (event.keyDown.keyCode == kbUp) {
+      m_interior->m_nick->move_caret_v(-1);
+    }
+    if (event.keyDown.keyCode == kbDown) {
+      m_interior->m_nick->move_caret_v(1);
+    }
     for (auto ch : event.keyDown.getText()) {
       if (isprint(ch)) m_interior->m_nick->insert_char(ch);
       // if (ch == '\n') m_interior->m_nick->insert_char('\n');
@@ -69,15 +81,25 @@ void editor_interior::handleEvent(TEvent &event) {
 void editor_interior::draw() // modified for scroller
 {
   auto line_count = m_nick->get_line_count();
-  for (int h = 0; h < line_count; h++) {
+  for (int h = 0; h < size.y; h++) {
     TDrawBuffer b;
-    std::string line_text = m_nick->get_line(h);
-    // line_text += std::string('x', 10);
-    line_text += std::string(size.x - line_text.size(), ' ');
+    std::string line_text;
+    if (h < line_count) {
+      line_text = m_nick->get_line(h);
+      // line_text += std::string('x', 10);
+      line_text += std::string(size.x - line_text.size(), ' ');
 
+    } else {
+      line_text = std::string(size.x, ' ');
+    }
     b.moveStr(0, line_text, getColor(0x0301));
     writeLine(0, h, line_text.size(), 1, b);
   }
+
+  auto [x, y] = m_nick->get_carret_pos();
+  // std::cout << "pos: " << x << " " << y << std::endl;
+  writeChar(x, y, '*', getColor(0x0100), 1);
+
   return;
 
   m_text.pop_back();

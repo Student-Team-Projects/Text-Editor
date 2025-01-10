@@ -1,6 +1,8 @@
 
 #include "scintilla/include/Scintilla.h"
+#include <array>
 #include <turbo/nicolas_cage.h>
+#include <iostream>
 #define let auto
 
 void NicolasCage::load_file(const char *filename) {}
@@ -36,14 +38,53 @@ std::string NicolasCage::get_line(int line) {
   return res;
 }
 
+void NicolasCage::move_caret_h(int amount) {
+  let pos = WndProc(SCI_GETCURRENTPOS, 0, 0);
+  WndProc(SCI_SETCURRENTPOS, pos + amount, 0);
+}
+
+void NicolasCage::move_caret_v(int amount) {
+  if (amount < 0) {
+    for (int i = 0; i < -amount; i++)
+      KeyCommand(SCI_LINEUP);
+  } else {
+    for (int i = 0; i < amount; i++)
+      KeyCommand(SCI_LINEDOWN);
+  }
+}
+
 void NicolasCage::insert_char(char ch) {
   char text[2] = {ch, 0};
   WndProc(SCI_ADDTEXT, 1, reinterpret_cast<sptr_t>(text));
-  WndProc(SCI_MOVECARETINSIDEVIEW, 0, 0);
+  // WndProc(SCI_MOVECARETINSIDEVIEW, 0, 0);
+  // KeyCommand(SCI_LINEUP);
+  // Command(SCK_DOCUMENTSTART);
+  //  WndProc(SCK_LEFT, 0, 0);
+  //  WndProc(SCK_LEFT, 0, 0);
+  //  WndProc(SCK_LEFT, 0, 0);
+  //  WndProc(SCK_LEFT, 0, 0);
+  //  ScintillaBase::KeyCommand(SCK_LEFT);
+  //  ScintillaBase::KeyCommand(SCK_LEFT);
+  //  ScintillaBase::KeyCommand(SCK_LEFT);
+  //  ScintillaBase::KeyCommand(SCK_LEFT);
 }
 void NicolasCage::delete_char() {
   let pos = WndProc(SCI_GETCURRENTPOS, 0, 0);
   WndProc(SCI_DELETERANGE, pos - 1, 1);
+}
+
+std::array<int, 2> NicolasCage::get_carret_pos() {
+  let pos = WndProc(SCI_GETCURRENTPOS, 0, 0);
+  let x = WndProc(SCI_GETCOLUMN, 0, pos);
+  let y = WndProc(SCI_POINTYFROMPOSITION, 0, pos);
+  return {(int)x, (int)y};
+
+  // int pos = WndProc(SCI_GETCURRENTPOS, 0, 0);
+  // pos = 20;
+  //// std::cout << "pos: " << pos << std::endl;
+  // int x = WndProc(SCI_POINTXFROMPOSITION, pos, pos);
+  // int y = WndProc(SCI_POINTYFROMPOSITION, pos, pos);
+  // return {x, y};
 }
 
 int NicolasCage::get_line_count() { return WndProc(SCI_GETLINECOUNT, 0, 0); }
