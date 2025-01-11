@@ -39,17 +39,27 @@ class NicolasCage : public ScintillaBase {
   void FineTickerStart(TickReason reason, int millis, int tolerance) override {}
   void FineTickerCancel(TickReason reason) override {}
 
+  // THer following is written by human being (matra)
   public:
   // additions:
   void load_file(const char *filename);
   void new_file();
+  // Write a char `ch` into the document at the current position
   void insert_char(char ch);
+  // Returns the line with number `line` in the document
   std::string get_line(int line);
+  // Removes one character from the current position
   void delete_char();
+  // Returns the number of lines in the document
   int get_line_count();
+  // Moves the cursor horizontally by `amount` characters
   void move_caret_h(int amount);
+  // Moves the cursor vertically by `amount` lines
   void move_caret_v(int amount);
+  // Returns the current position of the cursor
   std::array<int, 2> get_carret_pos();
+  // Returns the character at the position `pos`
+  char get_char_at(std::array<int, 2>);
 };
 } // namespace Scintilla
 

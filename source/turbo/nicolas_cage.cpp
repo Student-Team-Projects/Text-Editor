@@ -53,20 +53,15 @@ void NicolasCage::move_caret_v(int amount) {
   }
 }
 
+char NicolasCage::get_char_at(std::array<int, 2> pos) {
+  let pos_real = WndProc(SCI_POSITIONFROMLINE, pos[1], 0);
+  let ch = WndProc(SCI_GETCHARAT, pos_real + pos[0], 0);
+  return ch;
+}
+
 void NicolasCage::insert_char(char ch) {
   char text[2] = {ch, 0};
   WndProc(SCI_ADDTEXT, 1, reinterpret_cast<sptr_t>(text));
-  // WndProc(SCI_MOVECARETINSIDEVIEW, 0, 0);
-  // KeyCommand(SCI_LINEUP);
-  // Command(SCK_DOCUMENTSTART);
-  //  WndProc(SCK_LEFT, 0, 0);
-  //  WndProc(SCK_LEFT, 0, 0);
-  //  WndProc(SCK_LEFT, 0, 0);
-  //  WndProc(SCK_LEFT, 0, 0);
-  //  ScintillaBase::KeyCommand(SCK_LEFT);
-  //  ScintillaBase::KeyCommand(SCK_LEFT);
-  //  ScintillaBase::KeyCommand(SCK_LEFT);
-  //  ScintillaBase::KeyCommand(SCK_LEFT);
 }
 void NicolasCage::delete_char() {
   let pos = WndProc(SCI_GETCURRENTPOS, 0, 0);
@@ -75,8 +70,8 @@ void NicolasCage::delete_char() {
 
 std::array<int, 2> NicolasCage::get_carret_pos() {
   let pos = WndProc(SCI_GETCURRENTPOS, 0, 0);
-  let x = WndProc(SCI_GETCOLUMN, 0, pos);
-  let y = WndProc(SCI_POINTYFROMPOSITION, 0, pos);
+  let x = WndProc(SCI_GETCOLUMN, pos, pos);
+  let y = WndProc(SCI_LINEFROMPOSITION, pos, pos);
   return {(int)x, (int)y};
 
   // int pos = WndProc(SCI_GETCURRENTPOS, 0, 0);

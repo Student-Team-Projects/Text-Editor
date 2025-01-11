@@ -26,6 +26,9 @@ editor::editor(const TRect &bounds, std::string text)
   // insert("AAA");
   TScrollBar *vScrollBar = standardScrollBar(sbVertical | sbHandleKeyboard);
   TScrollBar *hScrollBar = standardScrollBar(sbHorizontal | sbHandleKeyboard);
+  // vScrollBar->setRange(0, 400);
+  // vScrollBar->setValue(100);
+  //  vScrollBar->setStep(1, 1);
   TRect r = getClipRect(); // get exposed view bounds
   r.grow(-1, -1);          // shrink to fit inside window frame
   m_interior = new editor_interior(r, hScrollBar, vScrollBar);
@@ -62,6 +65,10 @@ void editor::handleEvent(TEvent &event) {
     }
   }
   // std::cout << "editor::handleEvent: " << event.what << std::endl;
+  if (m_interior->m_nick->get_carret_pos()[1] > size.y) {
+    m_interior->delta.y++;
+    // m_nick->handleEvent(event);
+  }
   m_interior->draw();
 }
 
@@ -80,26 +87,37 @@ void editor_interior::handleEvent(TEvent &event) {
 
 void editor_interior::draw() // modified for scroller
 {
+  // scrollDraw();
+  //
   auto line_count = m_nick->get_line_count();
+  // std::cout << "size: " << size.x << " " << size.y << std::endl;
+  setLimit(100, line_count);
+  auto [x, y] = m_nick->get_carret_pos();
+  // scrollTo(x, y);
+  while (y >= delta.y + size.y) {
+    delta.y++;
+  }
+  while (y < delta.y) {
+    delta.y--;
+  }
   for (int h = 0; h < size.y; h++) {
     TDrawBuffer b;
     std::string line_text;
-    if (h < line_count) {
-      line_text = m_nick->get_line(h);
+    if (h + delta.y < line_count) {
+      line_text = m_nick->get_line(h + delta.y);
       // line_text += std::string('x', 10);
-      line_text += std::string(size.x - line_text.size(), ' ');
+      line_text += std::string(size.x - line_text.size(), '.');
 
     } else {
-      line_text = std::string(size.x, ' ');
+      line_text = std::string(size.x, '.');
     }
     b.moveStr(0, line_text, getColor(0x0301));
     writeLine(0, h, line_text.size(), 1, b);
   }
 
-  auto [x, y] = m_nick->get_carret_pos();
+  char ch = m_nick->get_char_at({x, y});
   // std::cout << "pos: " << x << " " << y << std::endl;
-  writeChar(x, y, '*', getColor(0x0100), 1);
-
+  writeChar(x, y - delta.y, ch, getColor(0x0100), 1);
   return;
 
   m_text.pop_back();
@@ -135,7 +153,6 @@ void editor_interior::draw() // modified for scroller
   for (int i = 0; i < lineCount; i++)
   // for each line:
   {
-
     TDrawBuffer b;
     b.moveChar(0, ' ', color, size.x);
     // fill line buffer with spaces
