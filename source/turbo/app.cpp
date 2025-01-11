@@ -1,5 +1,7 @@
 #include <algorithm>
 #include <filesystem>
+#include <iostream>
+#include <semaphore>
 #include <turbo/app.hpp>
 #include <turbo/clockView.hpp>
 #include <turbo/explorerWindow.hpp>
@@ -65,6 +67,10 @@ auto t_hello_app::handleEvent(TEvent &event) -> void {
       break;
     case open_file_in_editor:
       auto file = m_explorer->get_selesced_path();
+      if (file.back() == '/') {
+        file.pop_back();
+      }
+      // std::cout << "open_file_in_editor: " << file << std::endl;
       m_editor = new editor(deskTop->getExtent(), file);
       deskTop->insert(m_editor);
       break;
@@ -87,6 +93,11 @@ auto t_hello_app::initStatusLine(TRect rect) -> TStatusLine * {
   rect.a.y = rect.b.y - 1;
   return new TStatusLine(rect, *new TStatusDef(0, 0xFFFF) +
                                    *new TStatusItem("~Alt-X~ Exit", kbAltX, cmQuit) +
+                                   *new TStatusItem("~Ctrl-Shift-V~ Paste", 0, 0) +
+                                   *new TStatusItem("~Ctrl-Shift-C~ Copy line", 0, 0) +
+                                   *new TStatusItem("~Ctrl-Shift-X~ Cut line", 0, 0) +
+                                   *new TStatusItem("~Ctrl-Z~ Undo", 0, 0) +
+                                   *new TStatusItem("~Ctrl-Y~ Redo", 0, 0) +
                                    *new TStatusItem(nullptr, kbF10, cmMenu));
 }
 

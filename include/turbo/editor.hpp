@@ -16,6 +16,7 @@ class editor_interior : public TScroller {
                   TScrollBar *aVScrollBar); // constructor
   virtual void draw() override;             // override TView::draw
   virtual void handleEvent(TEvent &event) override;
+  void open_file(std::string);
   std::string m_text;
   NicolasCage *m_nick;
 };

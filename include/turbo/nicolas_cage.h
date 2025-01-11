@@ -2,6 +2,7 @@
 #include "scintilla/include/Scintilla.h"
 #include "scintilla/internals.h"
 #include <array>
+#include <iostream>
 #include <type_traits>
 
 namespace Scintilla {
@@ -11,12 +12,18 @@ class NicolasCage : public ScintillaBase {
   void SetVerticalScrollPos() override {}
   void SetHorizontalScrollPos() override {}
   bool ModifyScrollBars(Sci::Line nMax, Sci::Line nPage) override { return false; }
-  void Copy() override {}
-  void Paste() override {}
+  void Copy() override {
+    // std::cout << "copy called" << std::endl;
+  }
+  void Paste() override { // std::cout << "paste called" << std::endl;
+  }
   void ClaimSelection() override {}
   void NotifyChange() override {}
   void NotifyParent(SCNotification scn) override {}
-  void CopyToClipboard(const SelectionText &selectedText) override {}
+  void CopyToClipboard(const SelectionText &selectedText) override {
+    // TODO clipboard logic
+    /*std::cout << "copy to clipboard called" << std::endl;*/
+  }
   void SetMouseCapture(bool on) override {}
   bool HaveMouseCapture() override { return false; }
   sptr_t DefWndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) override {
@@ -33,7 +40,7 @@ class NicolasCage : public ScintillaBase {
   void NotifyLexerChanged(Scintilla::Document *, void *) override {}
   void NotifyErrorOccurred(Scintilla::Document *, void *, int) override {}
   void ListNotify(Scintilla::ListBoxEvent *) override {}
-
+  /**/
   // WTF 2.0
   bool FineTickerRunning(TickReason reason) override { return false; }
   void FineTickerStart(TickReason reason, int millis, int tolerance) override {}
@@ -42,7 +49,7 @@ class NicolasCage : public ScintillaBase {
   // THer following is written by human being (matra)
   public:
   // additions:
-  void load_file(const char *filename);
+  void load_file(std::string);
   void new_file();
   // Write a char `ch` into the document at the current position
   void insert_char(char ch);
@@ -60,6 +67,13 @@ class NicolasCage : public ScintillaBase {
   std::array<int, 2> get_carret_pos();
   // Returns the character at the position `pos`
   char get_char_at(std::array<int, 2>);
+
+  void paste();
+  void copy();
+  void cut();
+
+  void undo();
+  void redo();
 };
 } // namespace Scintilla
 

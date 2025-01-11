@@ -32,7 +32,8 @@ editor::editor(const TRect &bounds, std::string text)
   TRect r = getClipRect(); // get exposed view bounds
   r.grow(-1, -1);          // shrink to fit inside window frame
   m_interior = new editor_interior(r, hScrollBar, vScrollBar);
-  m_interior->m_text = text;
+  m_interior->open_file(text);
+  // m_interior->m_text = text;
 
   insert(m_interior);
 }
@@ -70,6 +71,7 @@ void editor::handleEvent(TEvent &event) {
     // m_nick->handleEvent(event);
   }
   m_interior->draw();
+  m_interior->handleEvent(event);
 }
 
 editor_interior::editor_interior(const TRect &bounds, TScrollBar *aHScrollBar,
@@ -78,11 +80,41 @@ editor_interior::editor_interior(const TRect &bounds, TScrollBar *aHScrollBar,
   growMode = gfGrowHiX | gfGrowHiY;
   options = options | ofFramed;
   m_nick = new NicolasCage();
-  m_nick->new_file();
-  // setLimit(maxLineLength, maxLines);
+  // m_nick->load_file(m_text);
+  //  m_nick->new_file();
+  //   setLimit(maxLineLength, maxLines);
 }
+
+void editor_interior::open_file(std::string filename) {
+  if (filename.empty()) {
+    m_nick->new_file();
+    return;
+  }
+  m_text = filename;
+  m_nick->load_file(filename);
+}
+
 void editor_interior::handleEvent(TEvent &event) {
-  std::cout << "editor_interior::handleEvent" << std::endl;
+  if (event.what == evKeyDown) {
+    if (event.keyDown.keyCode == kbCtrlV) {
+      m_nick->paste();
+    }
+    if (event.keyDown.keyCode == kbCtrlC) {
+      m_nick->copy();
+    }
+    if (event.keyDown.keyCode == kbCtrlX) {
+      m_nick->cut();
+    }
+    if (event.keyDown.keyCode == kbCtrlZ) {
+      m_nick->undo();
+    }
+    if (event.keyDown.keyCode == kbCtrlY) {
+      m_nick->redo();
+    }
+  }
+  draw();
+
+  // std::cout << "editor_interior::handleEvent" << std::endl;
 }
 
 void editor_interior::draw() // modified for scroller
@@ -119,61 +151,5 @@ void editor_interior::draw() // modified for scroller
   // std::cout << "pos: " << x << " " << y << std::endl;
   writeChar(x, y - delta.y, ch, getColor(0x0100), 1);
   return;
-
-  m_text.pop_back();
-  std::ifstream fileToView(m_text);
-  const int maxLines = 100;
-  const int maxLineLength = 1000;
-  char *lines[maxLines];
-  int lineCount = 0;
-
-  if (!fileToView) {
-    exit(1);
-  } else {
-    char buf[maxLineLength];
-    while (lineCount < maxLines && fileToView.getline(buf, maxLineLength)) {
-      lines[lineCount] = newStr(buf);
-      lineCount++;
-    }
-  }
-  // lines[lineCount++] = (char *)m_text.c_str();
-  ushort color = getColor(0x0301);
-  // char *lines[] = {"AALA", "BBB", 0, 0};
-  // std::ifstream file(".gitignore");
-  // std::vector<char *> lines;
-  // lines.push_back((char *)m_text.c_str());
-  // std::string s = file.is_open() ? "file is open" : "file is not open";
-
-  // std::string line;
-  // while (getline(file, line)) {
-  // lines.push_back((char *)line.c_str());
-  // }
-  //  lines.push_back((char *)m_text.c_str());
-
-  for (int i = 0; i < lineCount; i++)
-  // for each line:
-  {
-    TDrawBuffer b;
-    b.moveChar(0, ' ', color, size.x);
-    // fill line buffer with spaces
-    int j = delta.y + i; // delta is scroller offset
-    if (lines[j]) {
-      char s[1000];
-      if (delta.x > (int)strlen(lines[j]))
-        s[0] = EOS;
-      else {
-        strncpy(s, lines[j] + delta.x, size.x);
-        s[size.x] = EOS;
-      }
-      b.moveStr(0, s, color);
-    }
-    writeLine(0, i, size.x, 1, b);
-  }
-
-  // auto nick = NicolasCage().act();
-  //  auto nick = foo();
-  // TDrawBuffer b;
-  // b.moveStr(0, nick, color);
-  // writeLine(0, lineCount, size.x, 1, b);
 }
 
