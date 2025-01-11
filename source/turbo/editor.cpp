@@ -18,6 +18,10 @@
 #include <turbo/nicolas_cage.h>
 #define Uses_IfStreamGetLine
 
+// TPalette &editor_interior::getPalette() const {
+// auto p = m_palette;
+// return p;
+//}
 editor::editor(const TRect &bounds, std::string text)
     : TWindowInit(&editor::initFrame), TWindow(bounds, "EDIROT", wnNoNumber) {
   // auto *hsb = standardScrollBar(sbHorizontal);
@@ -76,10 +80,14 @@ void editor::handleEvent(TEvent &event) {
 
 editor_interior::editor_interior(const TRect &bounds, TScrollBar *aHScrollBar,
                                  TScrollBar *aVScrollBar)
-    : TScroller(bounds, aHScrollBar, aVScrollBar) {
+    : TScroller(bounds, aHScrollBar, aVScrollBar), m_palette((char *)0, 0) {
   growMode = gfGrowHiX | gfGrowHiY;
   options = options | ofFramed;
   m_nick = new NicolasCage();
+  TColorAttr color(27, 25);
+  TColorAttr color2[5] = {3, color, color, color, color};
+  TPalette p(color2);
+  m_palette = p;
   // m_nick->load_file(m_text);
   //  m_nick->new_file();
   //   setLimit(maxLineLength, maxLines);
@@ -119,7 +127,8 @@ void editor_interior::handleEvent(TEvent &event) {
 
 void editor_interior::draw() // modified for scroller
 {
-  ushort style[5] = {0x0301, 0x0302, 0x0300, 0x0100, 0x0802};
+  constexpr int styple_size = 7;
+  ushort style[styple_size] = {0, 1, 3, 5, 31, 32, 33};
   // scrollDraw();
   //
   auto line_count = m_nick->get_line_count();
@@ -138,16 +147,16 @@ void editor_interior::draw() // modified for scroller
     std::vector<cell> line_text;
     if (h + delta.y < line_count) {
       line_text = m_nick->get_styled_line(h + delta.y);
-      auto spaces = std::vector<cell>(size.x - line_text.size(), {'.', 0});
+      auto spaces = std::vector<cell>(size.x - line_text.size(), {' ', 0});
       line_text.insert(line_text.end(), spaces.begin(), spaces.end());
     } else {
-      line_text = std::vector<cell>(size.x, {'.', 0});
+      line_text = std::vector<cell>(size.x, {' ', 0});
     }
     // b.moveStr(0, line_text, getColor(0x0301));
     for (int i = 0; i < line_text.size(); i++) {
       auto st = line_text[i].style;
-      // if (st > 4) st = 4;
-      b.moveChar(i, line_text[i].character, getColor(style[st]), 1);
+      // if (st >= styple_size) st = styple_size - 1;
+      b.moveChar(i, line_text[i].character, st, 1);
     }
     writeLine(0, h, line_text.size(), 1, b);
   }

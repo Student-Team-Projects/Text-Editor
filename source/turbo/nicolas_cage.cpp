@@ -74,7 +74,7 @@ void NicolasCage::load_file(std::string filename) {
   // WndProc(SCI_ADDTEXT, name.size(), reinterpret_cast<sptr_t>(name.c_str()));
   {
     CatalogueModules cm;
-    // cm.AddLexerModule(new LexerModule(lmCPP));
+    // cm.AddLexerModule(new LexerModule(lmC/CPP));
     cm.Find(0);
   }
   ILexer5 *lexer = lmCPP.Create();
@@ -95,7 +95,7 @@ void NicolasCage::load_file(std::string filename) {
   // std::string msg = "old lex: " + std::to_string(old_lex) +
   //" new lex: " + std::to_string(new_lex) + "lan name: " + lan_name;
   // WndProc(SCI_ADDTEXT, msg.size(), reinterpret_cast<sptr_t>(msg.c_str()));
-  // WndProc(SCI_COLOURISE, 0, -1);
+  WndProc(SCI_COLOURISE, 0, -1);
   return;
   // for (int i = 0; i < lineCount; i++)
   //// for each line:
