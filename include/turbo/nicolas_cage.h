@@ -1,9 +1,17 @@
 #pragma once
 #include "scintilla/include/Scintilla.h"
 #include "scintilla/internals.h"
+#include "scintilla/lexlib/LexerModule.h"
+#include "scintilla/src/ScintillaBase.h"
 #include <array>
 #include <iostream>
 #include <type_traits>
+
+struct cell {
+  char character;
+  unsigned char style;
+};
+/*Scintilla::LexerModule lmCPP(0, nullptr);*/
 
 namespace Scintilla {
 
@@ -32,14 +40,29 @@ class NicolasCage : public ScintillaBase {
   void CreateCallTipWindow(PRectangle rc) override {}
   void AddToPopUp(const char *label, int cmd = 0, bool enabled = true) override {}
   /// below ade not needed to compile but are needed to link WTF
-  void NotifyModifyAttempt(Scintilla::Document *, void *) override {}
-  void NotifySavePoint(Scintilla::Document *, void *, bool) override {}
-  void NotifyModified(Scintilla::Document *, Scintilla::DocModification, void *) override {}
-  void NotifyDeleted(Scintilla::Document *, void *) noexcept override {}
-  void NotifyStyleNeeded(Scintilla::Document *, void *, long) override {}
-  void NotifyLexerChanged(Scintilla::Document *, void *) override {}
-  void NotifyErrorOccurred(Scintilla::Document *, void *, int) override {}
-  void ListNotify(Scintilla::ListBoxEvent *) override {}
+  void NotifyModifyAttempt(Scintilla::Document *a, void *b) override {
+    ScintillaBase::NotifyModifyAttempt(a, b);
+  }
+  void NotifySavePoint(Scintilla::Document *a, void *b, bool c) override {
+    ScintillaBase::NotifySavePoint(a, b, c);
+  }
+  void NotifyModified(Scintilla::Document *a, Scintilla::DocModification b,
+                      void *c) override {
+    ScintillaBase::NotifyModified(a, b, c);
+  }
+  void NotifyDeleted(Scintilla::Document *a, void *b) noexcept override {
+    ScintillaBase::NotifyDeleted(a, b);
+  }
+  void NotifyStyleNeeded(Scintilla::Document *a, void *b, long c) override {
+    ScintillaBase::NotifyStyleNeeded(a, b, c);
+  }
+  void NotifyLexerChanged(Scintilla::Document *a, void *b) override {
+    ScintillaBase::NotifyLexerChanged(a, b);
+  }
+  void NotifyErrorOccurred(Scintilla::Document *a, void *b, int c) override {
+    ScintillaBase::NotifyErrorOccurred(a, b, c);
+  }
+  void ListNotify(Scintilla::ListBoxEvent *a) override { ScintillaBase::ListNotify(a); }
   /**/
   // WTF 2.0
   bool FineTickerRunning(TickReason reason) override { return false; }
@@ -74,6 +97,7 @@ class NicolasCage : public ScintillaBase {
 
   void undo();
   void redo();
+  std::vector<cell> get_styled_line(int);
 };
 } // namespace Scintilla
 

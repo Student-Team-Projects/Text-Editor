@@ -1,6 +1,6 @@
-
-#include "scintilla/include/Scintilla.h"
+// #include "scintilla/include/Scintilla.h"
 #include <array>
+#include <cstdlib>
 #include <fstream>
 #include <turbo/nicolas_cage.h>
 #include <iostream>
@@ -21,6 +21,18 @@
 #include <iostream>
 
 #include <turbo/nicolas_cage.h>
+// #include <scintilla/include/ILex.h>
+// namespace cpp_namespace {
+// #include "../source/scintilla/lexers/LexCPP.cxx"
+//}
+// namespace {
+// #include "../source/scintilla/lexers/LexAsm.cxx"
+//}
+extern Scintilla::LexerModule lmCPP;
+
+#include <scintilla/include/ILexer.h>
+#include <scintilla/lexlib/CatalogueModules.h>
+// #include <scintilla/Lexilla.h>
 #define let auto
 
 void NicolasCage::load_file(std::string filename) {
@@ -47,6 +59,43 @@ void NicolasCage::load_file(std::string filename) {
     }
   }
   WndProc(SCI_SETTEXT, 0, reinterpret_cast<sptr_t>(all_text.c_str()));
+
+  cell s[5] = {
+      {'H', 0}, {'e', 1}, {'l', 2}, {'l', 3}, {'o', 4},
+  };
+  // WndProc(SCI_ADDSTYLEDTEXT, 10, reinterpret_cast<sptr_t>(s));
+
+  // char *lex_name[20];
+  // WndProc(SCI_GETLEXERLANGUAGE, 0, reinterpret_cast<sptr_t>(lex_name));
+  // std::string name;
+  // for (int i = 0; lex_name[i] != 0; i++) {
+  // name += lex_name[i];
+  //}
+  // WndProc(SCI_ADDTEXT, name.size(), reinterpret_cast<sptr_t>(name.c_str()));
+  {
+    CatalogueModules cm;
+    // cm.AddLexerModule(new LexerModule(lmCPP));
+    cm.Find(0);
+  }
+  ILexer5 *lexer = lmCPP.Create();
+  // let lexer = cm.Create(0);
+  // auto lm = CatalogueModules::Create(SCLEX_PYTHON);
+  //  const LexerModule *lm = Scintilla::Catalogue::Find(SCLEX_PYTHON);
+  int old_lex = WndProc(SCI_GETLEXER, 0, 0);
+  int new_lex = 0;
+  std::string lan_name(lmCPP.languageName);
+
+  // for (auto i = 0; i < 10; i++) {
+  WndProc(SCI_SETILEXER, 0, reinterpret_cast<sptr_t>(lexer));
+  new_lex = WndProc(SCI_GETLEXER, 0, 0);
+  // if (new_lex != old_lex) {
+  // break;
+  //}
+  //}
+  // std::string msg = "old lex: " + std::to_string(old_lex) +
+  //" new lex: " + std::to_string(new_lex) + "lan name: " + lan_name;
+  // WndProc(SCI_ADDTEXT, msg.size(), reinterpret_cast<sptr_t>(msg.c_str()));
+  // WndProc(SCI_COLOURISE, 0, -1);
   return;
   // for (int i = 0; i < lineCount; i++)
   //// for each line:
@@ -109,6 +158,24 @@ void NicolasCage::new_file() {
     std::string res(buffer);
     free(buffer);
   }
+}
+
+std::vector<cell> NicolasCage::get_styled_line(int line) {
+  let line_start = WndProc(SCI_POSITIONFROMLINE, line, 0);
+  let line_end = WndProc(SCI_GETLINEENDPOSITION, line, 0);
+
+  Sci_CharacterRange cr = {line_start, line_end};
+  let len = line_end - line_start + 1;
+  auto buf = (cell *)calloc(len, sizeof(cell));
+  Sci_TextRange tr = {cr, reinterpret_cast<char *>(buf)};
+
+  WndProc(SCI_GETSTYLEDTEXT, 0, reinterpret_cast<sptr_t>(&tr));
+  std::vector<cell> res;
+  for (int i = 0; i < len; i++) {
+    res.push_back(buf[i]);
+  }
+  free(buf);
+  return res;
 }
 
 std::string NicolasCage::get_line(int line) {
