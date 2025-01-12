@@ -1,4 +1,5 @@
-// #include "scintilla/include/Scintilla.h"
+#include "scintilla/include/Scintilla.h"
+// #include "scintilla/lexlib/LexerModule.h"
 #include <array>
 #include <cstdlib>
 #include <fstream>
@@ -28,11 +29,37 @@
 // namespace {
 // #include "../source/scintilla/lexers/LexAsm.cxx"
 //}
-extern Scintilla::LexerModule lmCPP;
 
-#include <scintilla/include/ILexer.h>
-#include <scintilla/lexlib/CatalogueModules.h>
+// #include <scintilla/include/ILexer.h>
 // #include <scintilla/Lexilla.h>
+extern Scintilla::LexerModule lmCPP;
+extern Scintilla::LexerModule lmPython;
+extern Scintilla::LexerModule lmAsm;
+extern Scintilla::LexerModule lmBash;
+extern Scintilla::LexerModule lmNull;
+
+std::map<std::string, int> extension2lexerId = {
+    {".cpp", SCLEX_CPP},  {".c", SCLEX_CPP},   {".h", SCLEX_CPP},   {".hpp", SCLEX_CPP},
+    {".cc", SCLEX_CPP},   {".asm", SCLEX_ASM}, {".s", SCLEX_ASM},   {".py", SCLEX_PYTHON},
+    {".txt", SCLEX_NULL}, {"", SCLEX_NULL},    {".sh", SCLEX_BASH},
+};
+std::vector<Scintilla::LexerModule *> lexers = {&lmCPP, &lmPython, &lmNull, &lmAsm,
+                                                &lmBash};
+
+Scintilla::LexerModule *get_lexer(std::string filename) {
+  auto ext = std::filesystem::path(filename).extension().string();
+  if (extension2lexerId.find(ext) == extension2lexerId.end()) {
+    return &lmCPP;
+  }
+  auto ind = extension2lexerId[ext];
+  for (auto lexer : lexers) {
+    if (lexer->GetLanguage() == ind) {
+      return lexer;
+    }
+  }
+  return &lmCPP;
+}
+
 #define let auto
 
 void NicolasCage::load_file(std::string filename) {
@@ -45,8 +72,6 @@ void NicolasCage::load_file(std::string filename) {
   int lineCount = 0;
 
   if (!fileToView) {
-    // exit(1);
-    // std::cout << "File not found" << std::endl;
     all_text += "file not found, file was: " + filename;
 
   } else {
@@ -54,46 +79,31 @@ void NicolasCage::load_file(std::string filename) {
     while (fileToView.getline(buf, maxLineLength)) {
       all_text += buf;
       all_text += "\n";
-      // lines[lineCount] = newStr(buf);
-      // lineCount++;
     }
   }
   WndProc(SCI_SETTEXT, 0, reinterpret_cast<sptr_t>(all_text.c_str()));
 
-  cell s[5] = {
-      {'H', 0}, {'e', 1}, {'l', 2}, {'l', 3}, {'o', 4},
-  };
+  // cell s[5] = {
+  //{'H', 0}, {'e', 1}, {'l', 2}, {'l', 3}, {'o', 4},
+  //};
   // WndProc(SCI_ADDSTYLEDTEXT, 10, reinterpret_cast<sptr_t>(s));
 
-  // char *lex_name[20];
-  // WndProc(SCI_GETLEXERLANGUAGE, 0, reinterpret_cast<sptr_t>(lex_name));
-  // std::string name;
-  // for (int i = 0; lex_name[i] != 0; i++) {
-  // name += lex_name[i];
-  //}
-  // WndProc(SCI_ADDTEXT, name.size(), reinterpret_cast<sptr_t>(name.c_str()));
-  {
-    CatalogueModules cm;
-    // cm.AddLexerModule(new LexerModule(lmC/CPP));
-    cm.Find(0);
-  }
-  ILexer5 *lexer = lmCPP.Create();
-  // let lexer = cm.Create(0);
-  // auto lm = CatalogueModules::Create(SCLEX_PYTHON);
-  //  const LexerModule *lm = Scintilla::Catalogue::Find(SCLEX_PYTHON);
-  int old_lex = WndProc(SCI_GETLEXER, 0, 0);
-  int new_lex = 0;
-  std::string lan_name(lmCPP.languageName);
+  let lexer = get_lexer(filename)->Create();
+  // const LexerModule *lm = Scintilla::Catalogue::Find(SCLEX_PYTHON);
+  // CreateLexer int old_lex = WndProc(SCI_GETLEXER, 0, 0);
+  // int new_lex = 0;
 
   // for (auto i = 0; i < 10; i++) {
   WndProc(SCI_SETILEXER, 0, reinterpret_cast<sptr_t>(lexer));
-  new_lex = WndProc(SCI_GETLEXER, 0, 0);
+  // new_lex = WndProc(SCI_GETLEXER, 0, 0);
   // if (new_lex != old_lex) {
   // break;
-  //}
-  //}
-  // std::string msg = "old lex: " + std::to_string(old_lex) +
-  //" new lex: " + std::to_string(new_lex) + "lan name: " + lan_name;
+  // }
+  // }
+  auto ext = std::filesystem::path(filename).extension().string();
+
+  // std::string msg = "ext: " + ext;
+
   // WndProc(SCI_ADDTEXT, msg.size(), reinterpret_cast<sptr_t>(msg.c_str()));
   WndProc(SCI_COLOURISE, 0, -1);
   return;
@@ -223,6 +233,8 @@ char NicolasCage::get_char_at(std::array<int, 2> pos) {
 void NicolasCage::insert_char(char ch) {
   char text[2] = {ch, 0};
   WndProc(SCI_ADDTEXT, 1, reinterpret_cast<sptr_t>(text));
+
+  WndProc(SCI_COLOURISE, 0, -1);
 }
 void NicolasCage::delete_char() {
   let pos = WndProc(SCI_GETCURRENTPOS, 0, 0);

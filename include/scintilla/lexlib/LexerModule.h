@@ -3,11 +3,11 @@
  ** Colourise for particular languages.
  **/
 // Copyright 1998-2001 by Neil Hodgson <neilh@scintilla.org>
-// The License.txt file describes the conditions under which this software may be distributed.
+// The License.txt file describes the conditions under which this software may be
+// distributed.
 
 #ifndef LEXERMODULE_H
 #define LEXERMODULE_H
-
 namespace Scintilla {
 
 class Accessor;
@@ -15,7 +15,7 @@ class WordList;
 struct LexicalClass;
 
 typedef void (*LexerFunction)(Sci_PositionU startPos, Sci_Position lengthDoc, int initStyle,
-                  WordList *keywordlists[], Accessor &styler);
+                              WordList *keywordlists[], Accessor &styler);
 typedef ILexer5 *(*LexerFactoryFunction)();
 
 /**
@@ -25,56 +25,47 @@ typedef ILexer5 *(*LexerFactoryFunction)();
  * The ExternalLexerModule subclass holds lexers loaded from DLLs or shared libraries.
  */
 class LexerModule {
-protected:
-	int language;
-	LexerFunction fnLexer;
-	LexerFunction fnFolder;
-	LexerFactoryFunction fnFactory;
-	const char * const * wordListDescriptions;
-	const LexicalClass *lexClasses;
-	size_t nClasses;
+  protected:
+  int language;
+  LexerFunction fnLexer;
+  LexerFunction fnFolder;
+  LexerFactoryFunction fnFactory;
+  const char *const *wordListDescriptions;
+  const LexicalClass *lexClasses;
+  size_t nClasses;
 
-public:
-	const char *languageName;
-	LexerModule(
-		int language_,
-		LexerFunction fnLexer_,
-		const char *languageName_=nullptr,
-		LexerFunction fnFolder_= nullptr,
-		const char * const wordListDescriptions_[]=nullptr,
-		const LexicalClass *lexClasses_=nullptr,
-		size_t nClasses_=0);
-	LexerModule(
-		int language_,
-		LexerFactoryFunction fnFactory_,
-		const char *languageName_,
-		const char * const wordListDescriptions_[]=nullptr);
-	virtual ~LexerModule();
-	int GetLanguage() const;
+  public:
+  const char *languageName;
+  LexerModule(int language_, LexerFunction fnLexer_, const char *languageName_ = nullptr,
+              LexerFunction fnFolder_ = nullptr,
+              const char *const wordListDescriptions_[] = nullptr,
+              const LexicalClass *lexClasses_ = nullptr, size_t nClasses_ = 0);
+  LexerModule(int language_, LexerFactoryFunction fnFactory_, const char *languageName_,
+              const char *const wordListDescriptions_[] = nullptr);
+  virtual ~LexerModule();
+  int GetLanguage() const;
 
-	// -1 is returned if no WordList information is available
-	int GetNumWordLists() const;
-	const char *GetWordListDescription(int index) const;
-	const LexicalClass *LexClasses() const;
-	size_t NamedStyles() const;
+  // -1 is returned if no WordList information is available
+  int GetNumWordLists() const;
+  const char *GetWordListDescription(int index) const;
+  const LexicalClass *LexClasses() const;
+  size_t NamedStyles() const;
 
-	ILexer5 *Create() const;
+  ILexer5 *Create() const;
 
-	virtual void Lex(Sci_PositionU startPos, Sci_Position lengthDoc, int initStyle,
-                  WordList *keywordlists[], Accessor &styler) const;
-	virtual void Fold(Sci_PositionU startPos, Sci_Position lengthDoc, int initStyle,
-                  WordList *keywordlists[], Accessor &styler) const;
+  virtual void Lex(Sci_PositionU startPos, Sci_Position lengthDoc, int initStyle,
+                   WordList *keywordlists[], Accessor &styler) const;
+  virtual void Fold(Sci_PositionU startPos, Sci_Position lengthDoc, int initStyle,
+                    WordList *keywordlists[], Accessor &styler) const;
 
-	friend class CatalogueModules;
+  friend class CatalogueModules;
 };
 
-inline int Maximum(int a, int b) {
-	return (a > b) ? a : b;
-}
+inline int Maximum(int a, int b) { return (a > b) ? a : b; }
 
 // Shut up annoying Visual C++ warnings:
 #ifdef _MSC_VER
-#pragma warning(disable: 4244 4456 4457)
+#pragma warning(disable : 4244 4456 4457)
 #endif
 
 // Turn off shadow warnings for lexers as may be maintained by others
@@ -88,6 +79,6 @@ inline int Maximum(int a, int b) {
 #pragma clang diagnostic ignored "-Wmissing-braces"
 #endif
 
-}
+} // namespace Scintilla
 
 #endif
