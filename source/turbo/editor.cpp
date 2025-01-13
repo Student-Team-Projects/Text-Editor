@@ -127,26 +127,28 @@ void editor_interior::handleEvent(TEvent &event) {
 
 void editor_interior::draw() // modified for scroller
 {
+  // return;
   constexpr int styple_size = 7;
   ushort style[styple_size] = {0, 1, 3, 5, 31, 32, 33};
   // scrollDraw();
   //
   auto line_count = m_nick->get_line_count();
   // std::cout << "size: " << size.x << " " << size.y << std::endl;
-  setLimit(100, line_count);
+  // setLimit(100, line_count);
   auto [x, y] = m_nick->get_carret_pos();
   // scrollTo(x, y);
-  while (y >= delta.y + size.y) {
-    delta.y++;
-  }
-  while (y < delta.y) {
-    delta.y--;
-  }
+  // while (y >= delta.y + size.y) {
+  // delta.y++;
+  //}
+  // while (y < delta.y) {
+  // delta.y--;
+  //}
+  int first_line = m_nick->get_first_line();
   for (int h = 0; h < size.y; h++) {
     TDrawBuffer b;
     std::vector<cell> line_text;
-    if (h + delta.y < line_count) {
-      line_text = m_nick->get_styled_line(h + delta.y);
+    if (h + first_line < line_count) {
+      line_text = m_nick->get_styled_line(h + first_line);
       auto spaces = std::vector<cell>(size.x - line_text.size(), {' ', 0});
       line_text.insert(line_text.end(), spaces.begin(), spaces.end());
     } else {
@@ -163,7 +165,7 @@ void editor_interior::draw() // modified for scroller
 
   char ch = m_nick->get_char_at({x, y});
   // std::cout << "pos: " << x << " " << y << std::endl;
-  writeChar(x, y - delta.y, ch, getColor(0x0100), 1);
+  writeChar(x, y - first_line, ch, getColor(0x0100), 1);
   return;
 }
 

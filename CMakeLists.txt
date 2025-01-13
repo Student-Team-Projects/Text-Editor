@@ -52,11 +52,14 @@ target_include_directories(scintilla PRIVATE
     "${CMAKE_CURRENT_LIST_DIR}/include/scintilla/lexlib"
     "${CMAKE_CURRENT_LIST_DIR}/include/scintilla/src"
     "${CMAKE_CURRENT_LIST_DIR}/include/scintilla"
+    "${CMAKE_CURRENT_LIST_DIR}/source/platform/surface.h"
 )
-
 target_compile_definitions(scintilla PRIVATE
     CURSES
     SCI_LEXER
+)
+target_link_libraries(scintilla PUBLIC
+    tvision
 )
 target_compile_features(scintilla PRIVATE cxx_std_17)
 #target_include_directories(scintilla PUBLIC

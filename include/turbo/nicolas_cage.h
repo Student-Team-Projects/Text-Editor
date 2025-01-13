@@ -98,6 +98,7 @@ class NicolasCage : public ScintillaBase {
   void undo();
   void redo();
   std::vector<cell> get_styled_line(int);
+  int get_first_line();
 };
 } // namespace Scintilla
 

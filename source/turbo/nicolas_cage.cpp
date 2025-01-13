@@ -82,56 +82,39 @@ void NicolasCage::load_file(std::string filename) {
     }
   }
   WndProc(SCI_SETTEXT, 0, reinterpret_cast<sptr_t>(all_text.c_str()));
+  WndProc(SCI_SETYCARETPOLICY, CARET_STRICT | CARET_EVEN, 10);
+  // WndProc(SCI_SETMARGINS, 5, 0);
+  // WndProc(SCI_SETMARGINWIDTHN, 0, 10);
+  // WndProc(SCI_SETMARGINTYPEN, 0, SC_MARGIN_NUMBER);
+  // WndProc(SCI_SETWRAPMODE, SC_WRAP_WORD, 0);
+  // WndProc(SCI_SETMARGINLEFT, 0, 0);
+  ////WndProc(SCI_SETMARGINRIGHT, 0, 0);
 
-  // cell s[5] = {
+  WndProc(SCI_SETEDGEMODE, EDGE_BACKGROUND, 0);
+  WndProc(SCI_SETEDGECOLUMN, 20, 0);
+  WndProc(SCI_SETEDGECOLOUR, 0xff00, 0);
+  //
+  //       cell s[5] = {
   //{'H', 0}, {'e', 1}, {'l', 2}, {'l', 3}, {'o', 4},
-  //};
-  // WndProc(SCI_ADDSTYLEDTEXT, 10, reinterpret_cast<sptr_t>(s));
+  //      };
+  //       WndProc(SCI_ADDSTYLEDTEXT, 10, reinterpret_cast<sptr_t>(s));
 
   let lexer = get_lexer(filename)->Create();
-  // const LexerModule *lm = Scintilla::Catalogue::Find(SCLEX_PYTHON);
-  // CreateLexer int old_lex = WndProc(SCI_GETLEXER, 0, 0);
-  // int new_lex = 0;
 
-  // for (auto i = 0; i < 10; i++) {
   WndProc(SCI_SETILEXER, 0, reinterpret_cast<sptr_t>(lexer));
-  // new_lex = WndProc(SCI_GETLEXER, 0, 0);
-  // if (new_lex != old_lex) {
-  // break;
-  // }
-  // }
-  auto ext = std::filesystem::path(filename).extension().string();
 
-  // std::string msg = "ext: " + ext;
+  auto ext = std::filesystem::path(filename).extension().string();
 
   // WndProc(SCI_ADDTEXT, msg.size(), reinterpret_cast<sptr_t>(msg.c_str()));
   WndProc(SCI_COLOURISE, 0, -1);
   return;
-  // for (int i = 0; i < lineCount; i++)
-  //// for each line:
-  //{
-  // TDrawBuffer b;
-  // b.moveChar(0, ' ', color, size.x);
-  //// fill line buffer with spaces
-  // int j = delta.y + i; // delta is scroller offset
-  // if (lines[j]) {
-  // char s[1000];
-  // if (delta.x > (int)strlen(lines[j]))
-  // s[0] = EOS;
-  // else {
-  // strncpy(s, lines[j] + delta.x, size.x);
-  // s[size.x] = EOS;
-  //}
-  // b.moveStr(0, s, color);
-  //}
-  // writeLine(0, i, size.x, 1, b);
-  //}
 }
 
 void NicolasCage::undo() { WndProc(SCI_UNDO, 0, 0); }
 void NicolasCage::redo() { WndProc(SCI_REDO, 0, 0); }
 
 void NicolasCage::paste() { WndProc(SCI_PASTE, 0, 0); }
+
 void NicolasCage::copy() {
   // std::cout << "copy called (better)" << std::endl;
   auto [x, y] = get_carret_pos();
@@ -141,6 +124,7 @@ void NicolasCage::copy() {
   WndProc(SCI_COPYRANGE, line_start, line_end);
   // WndProc(SCI_COPYALLOWLINE, 0, 0);
 }
+
 void NicolasCage::cut() {
   auto [x, y] = get_carret_pos();
   let line_start = WndProc(SCI_POSITIONFROMLINE, y, 0);
@@ -150,6 +134,7 @@ void NicolasCage::cut() {
   // std::cout << "  cut called (better)" << std::endl;
   //  WndProc(SCI_CUTALLOWLINE, 0, 0);
 }
+
 void NicolasCage::new_file() {
   auto text = "Garter, if you're gonna act like a baby,\n you might as well crawl back up "
               "your giant __ where you belong.\n\nYou're the ones acting irresponsible "
@@ -202,6 +187,7 @@ std::string NicolasCage::get_line(int line) {
 void NicolasCage::move_caret_h(int amount) {
   let pos = WndProc(SCI_GETCURRENTPOS, 0, 0);
   WndProc(SCI_SETCURRENTPOS, pos + amount, 0);
+  WndProc(SCI_SCROLLCARET, 0, 0);
 }
 // if (amount > 0)
 // WndProc(SCK_RIGHT, 0, 0);
@@ -222,6 +208,7 @@ void NicolasCage::move_caret_v(int amount) {
     for (int i = 0; i < amount; i++)
       KeyCommand(SCI_LINEDOWN);
   }
+  WndProc(SCI_SCROLLCARET, 0, 0);
 }
 
 char NicolasCage::get_char_at(std::array<int, 2> pos) {
@@ -235,10 +222,12 @@ void NicolasCage::insert_char(char ch) {
   WndProc(SCI_ADDTEXT, 1, reinterpret_cast<sptr_t>(text));
 
   WndProc(SCI_COLOURISE, 0, -1);
+  WndProc(SCI_SCROLLCARET, 0, 0);
 }
 void NicolasCage::delete_char() {
   let pos = WndProc(SCI_GETCURRENTPOS, 0, 0);
   WndProc(SCI_DELETERANGE, pos - 1, 1);
+  WndProc(SCI_SCROLLCARET, 0, 0);
 }
 
 std::array<int, 2> NicolasCage::get_carret_pos() {
@@ -257,30 +246,14 @@ std::array<int, 2> NicolasCage::get_carret_pos() {
 
 int NicolasCage::get_line_count() { return WndProc(SCI_GETLINECOUNT, 0, 0); }
 
-// std::string NicolasCage::act() {
-// auto text = "Garter, if you're gonna act like a baby,\n you might as well crawl back up
-// " "your giant __ where you belong.\n\nYou're the ones acting irresponsible "
-//"\nso you crawl into my __!";
-// WndProc(SCI_SETTEXT, 0, reinterpret_cast<sptr_t>(text));
+int NicolasCage::get_first_line() {
+  int line_height = WndProc(SCI_TEXTHEIGHT, 0, 0);
+  // int lines_on_screen = WndProc(SCI_LINESONSCREEN, 0, 0);
+  // std::cout << "lines on screen: " << lines_on_screen << std::endl;
+  //  std::cout << "line height: " << line_height << std::endl;
+  WndProc(SCI_SCROLLCARET, 0, 0);
+  int first_line = WndProc(SCI_GETFIRSTVISIBLELINE, 0, 0);
+  // std::cout << "first line: " << first_line << std::endl;
+  return first_line;
+}
 
-// let line_count = WndProc(SCI_GETLINECOUNT, 0, 0);
-// for (int line = 0; line < line_count; line++) {
-// let len = WndProc(SCI_GETLINE, line, 0);
-// let buffer = (char *)calloc(len + 1, sizeof(char));
-// WndProc(SCI_GETLINE, line, reinterpret_cast<sptr_t>(buffer));
-// buffer[len] = 0;
-// std::string res(buffer);
-// free(buffer);
-//}
-// auto line = 2;
-
-// int len = WndProc(SCI_GETLINE, line, 0);
-// let buffer = (char *)calloc(len + 1, sizeof(char));
-// WndProc(SCI_GETLINE, line, reinterpret_cast<sptr_t>(buffer));
-// buffer[len] = 0;
-// std::string res(buffer);
-//// res = res.substr(0, len);
-// return res;
-//}
-
-// std::string foo() { return "420"; }
