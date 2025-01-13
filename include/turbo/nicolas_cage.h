@@ -19,7 +19,9 @@ class NicolasCage : public ScintillaBase {
   public:
   void SetVerticalScrollPos() override {}
   void SetHorizontalScrollPos() override {}
-  bool ModifyScrollBars(Sci::Line nMax, Sci::Line nPage) override { return false; }
+  bool ModifyScrollBars(Sci::Line nMax, Sci::Line nPage) override {
+    return false;
+  }
   void Copy() override {
     // std::cout << "copy called" << std::endl;
   }
@@ -33,7 +35,9 @@ class NicolasCage : public ScintillaBase {
     /*std::cout << "copy to clipboard called" << std::endl;*/
   }
   void SetMouseCapture(bool on) override {}
-  bool HaveMouseCapture() override { return false; }
+  bool HaveMouseCapture() override {
+    return false;
+  }
   sptr_t DefWndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) override {
     return 0;
   }
@@ -62,10 +66,14 @@ class NicolasCage : public ScintillaBase {
   void NotifyErrorOccurred(Scintilla::Document *a, void *b, int c) override {
     ScintillaBase::NotifyErrorOccurred(a, b, c);
   }
-  void ListNotify(Scintilla::ListBoxEvent *a) override { ScintillaBase::ListNotify(a); }
+  void ListNotify(Scintilla::ListBoxEvent *a) override {
+    ScintillaBase::ListNotify(a);
+  }
   /**/
   // WTF 2.0
-  bool FineTickerRunning(TickReason reason) override { return false; }
+  bool FineTickerRunning(TickReason reason) override {
+    return false;
+  }
   void FineTickerStart(TickReason reason, int millis, int tolerance) override {}
   void FineTickerCancel(TickReason reason) override {}
 
@@ -91,14 +99,22 @@ class NicolasCage : public ScintillaBase {
   // Returns the character at the position `pos`
   char get_char_at(std::array<int, 2>);
 
+  // crtl + z, crtl + y, crtl + v, crtl + c, crtl + x
   void paste();
   void copy();
   void cut();
-
   void undo();
   void redo();
+  // The same as get line but each character has a style
   std::vector<cell> get_styled_line(int);
+  // reurnst the index of the first line to be print on the screen
   int get_first_line();
+  // Sets the position of the cursor to `pos`
+  void set_carret_pos(std::array<int, 2>);
+  // Returns the text of the margin of the line `line`
+  std::string get_margin_text(int line);
+  // updates the lexer
+  void colorize();
 };
 } // namespace Scintilla
 

@@ -120,6 +120,12 @@ void editor_interior::handleEvent(TEvent &event) {
       m_nick->redo();
     }
   }
+  if (event.what == evMouseDown) {
+    // std::cout << "editor_interior::handleEvent: " << event.mouse.where.x << " " <<
+    // event.mouse.where.y << std::endl;
+    m_nick->set_carret_pos({event.mouse.where.x - 1, event.mouse.where.y - 2});
+  }
+  m_nick->colorize();
   draw();
 
   // std::cout << "editor_interior::handleEvent" << std::endl;
@@ -160,53 +166,24 @@ void editor_interior::draw() // modified for scroller
       // if (st >= styple_size) st = styple_size - 1;
       b.moveChar(i, line_text[i].character, st, 1);
     }
+
     writeLine(0, h, line_text.size(), 1, b);
+
+    std::string margin_text = m_nick->get_margin_text(h);
+    // margin_text = "XY";
+    // if (h == 0) std::cout << "margin_text: " << margin_text << "__" << std::endl;
+
+    // for (int i = 0; i < margin_text.size(); i++) {
+    // char c = margin_text[i];
+    // writeChar(i, h, c, getColor(0x0100), 1);
+    //}
   }
+  // writeLine(0, h, margin_text.size(), getColor(0x0100), margin_text.c_str());
 
   char ch = m_nick->get_char_at({x, y});
+  if (!isprint(ch)) ch = ' ';
   // std::cout << "pos: " << x << " " << y << std::endl;
   writeChar(x, y - first_line, ch, getColor(0x0100), 1);
   return;
 }
 
-// void editor_interior::draw() // modified for scroller
-//{
-// ushort style[5] = {0x0301, 0x0302, 0x0303, 0x0304, 0x0305};
-//// scrollDraw();
-////
-// auto line_count = m_nick->get_line_count();
-//// std::cout << "size: " << size.x << " " << size.y << std::endl;
-// setLimit(100, line_count);
-// auto [x, y] = m_nick->get_carret_pos();
-//// scrollTo(x, y);
-// while (y >= delta.y + size.y) {
-// delta.y++;
-//}
-// while (y < delta.y) {
-// delta.y--;
-//}
-// for (int h = 0; h < size.y; h++) {
-// TDrawBuffer b;
-// std::string line_text;
-// if (h + delta.y < line_count) {
-// auto v = m_nick->get_styled_line(h + delta.y);
-// for (auto c : v) {
-// line_text += c.character;
-//}
-//// line_text = m_nick->get_line(h + delta.y);
-////  line_text += std::string('x', 10);
-// line_text += std::string(size.x - line_text.size(), '.');
-
-//} else {
-// line_text = std::string(size.x, '.');
-//}
-// b.moveStr(0, line_text, getColor(0x0301));
-// writeLine(0, h, line_text.size(), 1, b);
-//}
-
-// char ch = m_nick->get_char_at({x, y});
-//// std::cout << "pos: " << x << " " << y << std::endl;
-// writeChar(x, y - delta.y, ch, getColor(0x0100), 1);
-// return;
-//}
-//

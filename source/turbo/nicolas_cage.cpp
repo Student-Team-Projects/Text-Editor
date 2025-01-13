@@ -32,21 +32,20 @@
 
 // #include <scintilla/include/ILexer.h>
 // #include <scintilla/Lexilla.h>
-extern Scintilla::LexerModule lmCPP;
-extern Scintilla::LexerModule lmPython;
-extern Scintilla::LexerModule lmAsm;
-extern Scintilla::LexerModule lmBash;
-extern Scintilla::LexerModule lmNull;
+extern const Scintilla::LexerModule lmCPP, lmPython;
+extern const Scintilla::LexerModule lmAsm;
+extern const Scintilla::LexerModule lmBash;
+extern const Scintilla::LexerModule lmNull;
 
 std::map<std::string, int> extension2lexerId = {
     {".cpp", SCLEX_CPP},  {".c", SCLEX_CPP},   {".h", SCLEX_CPP},   {".hpp", SCLEX_CPP},
     {".cc", SCLEX_CPP},   {".asm", SCLEX_ASM}, {".s", SCLEX_ASM},   {".py", SCLEX_PYTHON},
     {".txt", SCLEX_NULL}, {"", SCLEX_NULL},    {".sh", SCLEX_BASH},
 };
-std::vector<Scintilla::LexerModule *> lexers = {&lmCPP, &lmPython, &lmNull, &lmAsm,
-                                                &lmBash};
+std::vector<const Scintilla::LexerModule *> lexers = {&lmCPP, &lmPython, &lmNull, &lmAsm,
+                                                      &lmBash};
 
-Scintilla::LexerModule *get_lexer(std::string filename) {
+const Scintilla::LexerModule *get_lexer(std::string filename) {
   auto ext = std::filesystem::path(filename).extension().string();
   if (extension2lexerId.find(ext) == extension2lexerId.end()) {
     return &lmCPP;
@@ -82,22 +81,27 @@ void NicolasCage::load_file(std::string filename) {
     }
   }
   WndProc(SCI_SETTEXT, 0, reinterpret_cast<sptr_t>(all_text.c_str()));
-  WndProc(SCI_SETYCARETPOLICY, CARET_STRICT | CARET_EVEN, 10);
-  // WndProc(SCI_SETMARGINS, 5, 0);
+  // WndProc(SCI_SETYCARETPOLICY, CARET_STRICT | CARET_EVEN, 10);
+  // WndProc(SCI_SETVIEWEOL, 0, 0);
+
+  // WndProc(SCI_SETMARGINS, 1, 0);
   // WndProc(SCI_SETMARGINWIDTHN, 0, 10);
-  // WndProc(SCI_SETMARGINTYPEN, 0, SC_MARGIN_NUMBER);
-  // WndProc(SCI_SETWRAPMODE, SC_WRAP_WORD, 0);
-  // WndProc(SCI_SETMARGINLEFT, 0, 0);
+  WndProc(SCI_SETMARGINTYPEN, 0, SC_MARGIN_NUMBER);
+  WndProc(SC_MARGIN_TEXT, 0, 0);
+  WndProc(SCI_MARGINSETTEXT, 1, reinterpret_cast<sptr_t>("0"));
+
+  //   WndProc(SCI_SETWRAPMODE, SC_WRAP_WORD, 0);
+  //   WndProc(SCI_SETMARGINLEFT, 0, 0);
   ////WndProc(SCI_SETMARGINRIGHT, 0, 0);
 
-  WndProc(SCI_SETEDGEMODE, EDGE_BACKGROUND, 0);
-  WndProc(SCI_SETEDGECOLUMN, 20, 0);
-  WndProc(SCI_SETEDGECOLOUR, 0xff00, 0);
+  // WndProc(SCI_SETEDGEMODE, EDGE_BACKGROUND, 0);
+  // WndProc(SCI_SETEDGECOLUMN, 20, 0);
+  // WndProc(SCI_SETEDGECOLOUR, 0xff00, 0);
   //
-  //       cell s[5] = {
+  //        cell s[5] = {
   //{'H', 0}, {'e', 1}, {'l', 2}, {'l', 3}, {'o', 4},
-  //      };
-  //       WndProc(SCI_ADDSTYLEDTEXT, 10, reinterpret_cast<sptr_t>(s));
+  //       };
+  //        WndProc(SCI_ADDSTYLEDTEXT, 10, reinterpret_cast<sptr_t>(s));
 
   let lexer = get_lexer(filename)->Create();
 
@@ -110,10 +114,32 @@ void NicolasCage::load_file(std::string filename) {
   return;
 }
 
-void NicolasCage::undo() { WndProc(SCI_UNDO, 0, 0); }
-void NicolasCage::redo() { WndProc(SCI_REDO, 0, 0); }
+void NicolasCage::set_carret_pos(std::array<int, 2> pos) {
+  // let pos_real = WndProc(SCI_POSITIONFROMLINE, pos[1], 0);
+  auto [x, y] = pos;
+  let line_len = WndProc(SCI_GETLINE, y, 0);
+  auto lines_count = WndProc(SCI_GETLINECOUNT, 0, 0);
+  x = min(line_len - 1, x);
+  if (y >= lines_count) {
+    y = lines_count - 1;
+    x = line_len - 1;
+  }
 
-void NicolasCage::paste() { WndProc(SCI_PASTE, 0, 0); }
+  int line_start = WndProc(SCI_POSITIONFROMLINE, y, 0);
+  // let pos_final = WndProc(SCI_POSITIONFROMPOINT, pos[0], pos[1]);
+  WndProc(SCI_SETCURRENTPOS, line_start + x, 0);
+  // WndProc(SCI_SCROLLCARET, 0, 0);
+}
+void NicolasCage::undo() {
+  WndProc(SCI_UNDO, 0, 0);
+}
+void NicolasCage::redo() {
+  WndProc(SCI_REDO, 0, 0);
+}
+
+void NicolasCage::paste() {
+  WndProc(SCI_PASTE, 0, 0);
+}
 
 void NicolasCage::copy() {
   // std::cout << "copy called (better)" << std::endl;
@@ -155,6 +181,14 @@ void NicolasCage::new_file() {
   }
 }
 
+std::string NicolasCage::get_margin_text(int line) {
+  char buf[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+  int len = WndProc(SCI_MARGINGETTEXT, line, reinterpret_cast<sptr_t>(buf));
+  buf[9] = 0;
+  std::string res((char *)buf);
+  return res;
+}
+
 std::vector<cell> NicolasCage::get_styled_line(int line) {
   let line_start = WndProc(SCI_POSITIONFROMLINE, line, 0);
   let line_end = WndProc(SCI_GETLINEENDPOSITION, line, 0);
@@ -170,14 +204,15 @@ std::vector<cell> NicolasCage::get_styled_line(int line) {
     res.push_back(buf[i]);
   }
   free(buf);
+  if (res.back().character == 0) res.pop_back();
   return res;
 }
 
 std::string NicolasCage::get_line(int line) {
   let len = WndProc(SCI_GETLINE, line, 0);
-  let buffer = (char *)calloc(len, sizeof(char));
+  let buffer = (char *)calloc(len + 1, sizeof(char));
   WndProc(SCI_GETLINE, line, reinterpret_cast<sptr_t>(buffer));
-  // buffer[len] = 0;
+  buffer[len] = 0;
   if (buffer[len - 1] == '\n') buffer[len - 1] = 0;
   std::string res(buffer);
   free(buffer);
@@ -211,6 +246,9 @@ void NicolasCage::move_caret_v(int amount) {
   WndProc(SCI_SCROLLCARET, 0, 0);
 }
 
+void NicolasCage::colorize() {
+  WndProc(SCI_COLOURISE, 0, -1);
+}
 char NicolasCage::get_char_at(std::array<int, 2> pos) {
   let pos_real = WndProc(SCI_POSITIONFROMLINE, pos[1], 0);
   let ch = WndProc(SCI_GETCHARAT, pos_real + pos[0], 0);
@@ -244,7 +282,9 @@ std::array<int, 2> NicolasCage::get_carret_pos() {
   // return {x, y};
 }
 
-int NicolasCage::get_line_count() { return WndProc(SCI_GETLINECOUNT, 0, 0); }
+int NicolasCage::get_line_count() {
+  return WndProc(SCI_GETLINECOUNT, 0, 0);
+}
 
 int NicolasCage::get_first_line() {
   int line_height = WndProc(SCI_TEXTHEIGHT, 0, 0);

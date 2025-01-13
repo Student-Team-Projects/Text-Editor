@@ -10,4 +10,7 @@ ColumnLimit: 92
 AccessModifierOffset: -4
 BreakBeforeBraces: Attach
 SortIncludes: false
+MaxEmptyLinesToKeep: 2
+AllowShortFunctionsOnASingleLine: Empty
+#readability-identifier-naming.ClassCase: CamelCase
 ...

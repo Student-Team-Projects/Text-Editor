@@ -287,7 +287,9 @@ void Editor::RefreshStyleData() {
   }
 }
 
-Point Editor::GetVisibleOriginInMain() const { return Point(0, 0); }
+Point Editor::GetVisibleOriginInMain() const {
+  return Point(0, 0);
+}
 
 PointDocument Editor::DocumentPointFromView(Point ptView) const {
   PointDocument ptDocument(ptView);
@@ -309,9 +311,13 @@ Sci::Line Editor::TopLineOfMain() const {
     return topLine;
 }
 
-PRectangle Editor::GetClientRectangle() const { return wMain.GetClientPosition(); }
+PRectangle Editor::GetClientRectangle() const {
+  return wMain.GetClientPosition();
+}
 
-PRectangle Editor::GetClientDrawingRectangle() { return GetClientRectangle(); }
+PRectangle Editor::GetClientDrawingRectangle() {
+  return GetClientRectangle();
+}
 
 PRectangle Editor::GetTextRectangle() const {
   PRectangle rc = GetClientRectangle();
@@ -537,13 +543,21 @@ void Editor::InvalidateRange(Sci::Position start, Sci::Position end) {
       RectangleFromRange(Range(start, end), view.LinesOverlap() ? vs.lineOverlap : 0));
 }
 
-Sci::Position Editor::CurrentPosition() const { return sel.MainCaret(); }
+Sci::Position Editor::CurrentPosition() const {
+  return sel.MainCaret();
+}
 
-bool Editor::SelectionEmpty() const noexcept { return sel.Empty(); }
+bool Editor::SelectionEmpty() const noexcept {
+  return sel.Empty();
+}
 
-SelectionPosition Editor::SelectionStart() { return sel.RangeMain().Start(); }
+SelectionPosition Editor::SelectionStart() {
+  return sel.RangeMain().Start();
+}
 
-SelectionPosition Editor::SelectionEnd() { return sel.RangeMain().End(); }
+SelectionPosition Editor::SelectionEnd() {
+  return sel.RangeMain().End();
+}
 
 void Editor::SetRectangularRange() {
   if (sel.IsRectangular()) {
@@ -608,7 +622,9 @@ void Editor::InvalidateSelection(SelectionRange newMain, bool invalidateWholeSel
   InvalidateRange(firstAffected, lastAffected);
 }
 
-void Editor::InvalidateWholeSelection() { InvalidateSelection(sel.RangeMain(), true); }
+void Editor::InvalidateWholeSelection() {
+  InvalidateSelection(sel.RangeMain(), true);
+}
 
 /* For Line selection - the anchor and caret are always
    at the beginning and end of the region lines. */
@@ -679,7 +695,9 @@ void Editor::SetSelection(SelectionPosition currentPos_) {
   QueueIdleWork(WorkNeeded::workUpdateUI);
 }
 
-void Editor::SetSelection(int currentPos_) { SetSelection(SelectionPosition(currentPos_)); }
+void Editor::SetSelection(int currentPos_) {
+  SetSelection(SelectionPosition(currentPos_));
+}
 
 void Editor::SetEmptySelection(SelectionPosition currentPos_) {
   const Sci::Line currentLine = pdoc->SciLineFromPosition(currentPos_.Position());
@@ -910,7 +928,9 @@ SelectionPosition Editor::MovePositionSoVisible(Sci::Position pos, int moveDir) 
   return MovePositionSoVisible(SelectionPosition(pos), moveDir);
 }
 
-Point Editor::PointMainCaret() { return LocationFromPosition(sel.Range(sel.Main()).caret); }
+Point Editor::PointMainCaret() {
+  return LocationFromPosition(sel.Range(sel.Main()).caret);
+}
 
 /**
  * Choose the x position that the caret will try to stick to
@@ -1044,9 +1064,13 @@ void Editor::MoveSelectedLines(int lineDelta) {
   SetSelection(CurrentPosition(), CurrentPosition() + selectionLength);
 }
 
-void Editor::MoveSelectedLinesUp() { MoveSelectedLines(-1); }
+void Editor::MoveSelectedLinesUp() {
+  MoveSelectedLines(-1);
+}
 
-void Editor::MoveSelectedLinesDown() { MoveSelectedLines(1); }
+void Editor::MoveSelectedLinesDown() {
+  MoveSelectedLines(1);
+}
 
 void Editor::MoveCaretInsideView(bool ensureVisible) {
   const PRectangle rcClient = GetTextRectangle();
@@ -1444,7 +1468,9 @@ void Editor::NotifyCaretMove() {}
 
 void Editor::UpdateSystemCaret() {}
 
-bool Editor::Wrapping() const noexcept { return vs.wrapState != eWrapNone; }
+bool Editor::Wrapping() const noexcept {
+  return vs.wrapState != eWrapNone;
+}
 
 void Editor::NeedWrapping(Sci::Line docLineStart, Sci::Line docLineEnd) {
   // Platform::DebugPrintf("\nNeedWrapping: %0d..%0d\n", docLineStart, docLineEnd);
@@ -2177,7 +2203,9 @@ void Editor::PasteRectangular(SelectionPosition pos, const char *ptr, Sci::Posit
   SetEmptySelection(pos);
 }
 
-bool Editor::CanPaste() { return !pdoc->IsReadOnly() && !SelectionContainsProtected(); }
+bool Editor::CanPaste() {
+  return !pdoc->IsReadOnly() && !SelectionContainsProtected();
+}
 
 void Editor::Clear() {
   // If multiple selections, don't delete EOLS
@@ -2299,7 +2327,9 @@ void Editor::NotifyFocus(bool focus) {
   NotifyParent(scn);
 }
 
-void Editor::SetCtrlID(int identifier) { ctrlID = identifier; }
+void Editor::SetCtrlID(int identifier) {
+  ctrlID = identifier;
+}
 
 void Editor::NotifyStyleToNeeded(Sci::Position endStyleNeeded) {
   SCNotification scn = {};
@@ -2314,7 +2344,9 @@ void Editor::NotifyStyleNeeded(Document *, void *, Sci::Position endStyleNeeded)
 
 void Editor::NotifyLexerChanged(Document *, void *) {}
 
-void Editor::NotifyErrorOccurred(Document *, void *, int status) { errorStatus = status; }
+void Editor::NotifyErrorOccurred(Document *, void *, int status) {
+  errorStatus = status;
+}
 
 void Editor::NotifyChar(int ch, CharacterSource charSource) {
   SCNotification scn = {};
@@ -2848,7 +2880,9 @@ void Editor::NotifyMacroRecord(unsigned int iMessage, uptr_t wParam, sptr_t lPar
 }
 
 // Something has changed that the container should know about
-void Editor::ContainerNeedsUpdate(int flags) noexcept { needUpdateUI |= flags; }
+void Editor::ContainerNeedsUpdate(int flags) noexcept {
+  needUpdateUI |= flags;
+}
 
 /**
  * Force scroll and keep position relative to top of window.
@@ -3038,7 +3072,9 @@ void Editor::Duplicate(bool forLine) {
   }
 }
 
-void Editor::CancelModes() { sel.SetMoveExtends(false); }
+void Editor::CancelModes() {
+  sel.SetMoveExtends(false);
+}
 
 void Editor::NewLine() {
   InvalidateWholeSelection();
@@ -3231,9 +3267,13 @@ Sci::Position Editor::StartEndDisplayLine(Sci::Position pos, bool start) {
 
 namespace {
 
-constexpr short HighShortFromWParam(uptr_t x) { return static_cast<short>(x >> 16); }
+constexpr short HighShortFromWParam(uptr_t x) {
+  return static_cast<short>(x >> 16);
+}
 
-constexpr short LowShortFromWParam(uptr_t x) { return static_cast<short>(x & 0xffff); }
+constexpr short LowShortFromWParam(uptr_t x) {
+  return static_cast<short>(x & 0xffff);
+}
 
 constexpr unsigned int WithExtends(unsigned int iMessage) noexcept {
   switch (iMessage) {
@@ -3935,7 +3975,9 @@ int Editor::KeyCommand(unsigned int iMessage) {
   return 0;
 }
 
-int Editor::KeyDefault(int, int) { return 0; }
+int Editor::KeyDefault(int, int) {
+  return 0;
+}
 
 int Editor::KeyDownWithModifiers(int key, int modifiers, bool *consumed) {
   DwellEnd(false);
@@ -4022,7 +4064,9 @@ void Editor::Indent(bool forwards) {
 
 class CaseFolderASCII : public CaseFolderTable {
   public:
-  CaseFolderASCII() noexcept { StandardASCII(); }
+  CaseFolderASCII() noexcept {
+    StandardASCII();
+  }
 };
 
 CaseFolder *Editor::CaseFolderForEncoding() {
@@ -4070,7 +4114,9 @@ Sci::Position Editor::FindText(
  * while still setting the selection to found text so the find/select
  * operation is self-contained.
  */
-void Editor::SearchAnchor() { searchAnchor = SelectionStart().Position(); }
+void Editor::SearchAnchor() {
+  searchAnchor = SelectionStart().Position();
+}
 
 /**
  * Find text from current search anchor: Must call @c SearchAnchor first.
@@ -4732,7 +4778,9 @@ void Editor::SetHotSpotRange(const Point *pt) {
   }
 }
 
-Range Editor::GetHotSpotRange() const noexcept { return hotspot; }
+Range Editor::GetHotSpotRange() const noexcept {
+  return hotspot;
+}
 
 void Editor::ButtonMoveWithModifiers(Point pt, unsigned int, int modifiers) {
   if (ptMouseLast != pt) {
@@ -5010,11 +5058,15 @@ bool Editor::FineTickerRunning(TickReason) {
 
 // FineTickerStart is be overridden by subclasses that support fine ticking so
 // this method should never be called.
-void Editor::FineTickerStart(TickReason, int, int) { assert(false); }
+void Editor::FineTickerStart(TickReason, int, int) {
+  assert(false);
+}
 
 // FineTickerCancel is be overridden by subclasses that support fine ticking so
 // this method should never be called.
-void Editor::FineTickerCancel(TickReason) { assert(false); }
+void Editor::FineTickerCancel(TickReason) {
+  assert(false);
+}
 
 void Editor::SetFocusState(bool focusState) {
   hasFocus = focusState;
@@ -5625,7 +5677,9 @@ void Editor::AddStyledText(const char *buffer, Sci::Position appendLength) {
   SetEmptySelection(sel.MainCaret() + lengthInserted);
 }
 
-bool Editor::ValidMargin(uptr_t wParam) const noexcept { return wParam < vs.ms.size(); }
+bool Editor::ValidMargin(uptr_t wParam) const noexcept {
+  return wParam < vs.ms.size();
+}
 
 void Editor::StyleSetMessage(unsigned int iMessage, uptr_t wParam, sptr_t lParam) {
   vs.EnsureStyle(wParam);

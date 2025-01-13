@@ -12,7 +12,9 @@ Window::~Window() {}
 
 void Window::Destroy() {}
 
-PRectangle Window::GetPosition() const { return PRectangle(0, 0, 10, 10); }
+PRectangle Window::GetPosition() const {
+  return PRectangle(0, 0, 10, 10);
+}
 
 void Window::SetPosition(PRectangle rc) {}
 
