@@ -7,6 +7,7 @@
 #include <iostream>
 #include <type_traits>
 
+// represeents a character with style(color)
 struct cell {
   char character;
   unsigned char style;
@@ -110,11 +111,14 @@ class NicolasCage : public ScintillaBase {
   // reurnst the index of the first line to be print on the screen
   int get_first_line();
   // Sets the position of the cursor to `pos`
-  void set_carret_pos(std::array<int, 2>);
+  void set_carret_pos(std::array<int, 2>, bool = true);
   // Returns the text of the margin of the line `line`
   std::string get_margin_text(int line);
   // updates the lexer
   void colorize();
+  // The column that the cursor before when moved to the line with less characters. When it
+  // moves to a line with more characters, it will be the same as the column of the cursor
+  int prefered_column;
 };
 } // namespace Scintilla
 

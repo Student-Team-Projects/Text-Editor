@@ -90,6 +90,7 @@ void NicolasCage::load_file(std::string filename) {
   WndProc(SC_MARGIN_TEXT, 0, 0);
   WndProc(SCI_MARGINSETTEXT, 1, reinterpret_cast<sptr_t>("0"));
 
+  this->prefered_column = 0;
   //   WndProc(SCI_SETWRAPMODE, SC_WRAP_WORD, 0);
   //   WndProc(SCI_SETMARGINLEFT, 0, 0);
   ////WndProc(SCI_SETMARGINRIGHT, 0, 0);
@@ -114,7 +115,8 @@ void NicolasCage::load_file(std::string filename) {
   return;
 }
 
-void NicolasCage::set_carret_pos(std::array<int, 2> pos) {
+
+void NicolasCage::set_carret_pos(std::array<int, 2> pos, bool set_prefered_column) {
   // let pos_real = WndProc(SCI_POSITIONFROMLINE, pos[1], 0);
   auto [x, y] = pos;
   let line_len = WndProc(SCI_GETLINE, y, 0);
@@ -124,7 +126,7 @@ void NicolasCage::set_carret_pos(std::array<int, 2> pos) {
     y = lines_count - 1;
     x = line_len - 1;
   }
-
+  if (set_prefered_column) this->prefered_column = x;
   int line_start = WndProc(SCI_POSITIONFROMLINE, y, 0);
   // let pos_final = WndProc(SCI_POSITIONFROMPOINT, pos[0], pos[1]);
   WndProc(SCI_SETCURRENTPOS, line_start + x, 0);
@@ -223,6 +225,7 @@ void NicolasCage::move_caret_h(int amount) {
   let pos = WndProc(SCI_GETCURRENTPOS, 0, 0);
   WndProc(SCI_SETCURRENTPOS, pos + amount, 0);
   WndProc(SCI_SCROLLCARET, 0, 0);
+  this->prefered_column = get_carret_pos()[0];
 }
 // if (amount > 0)
 // WndProc(SCK_RIGHT, 0, 0);
@@ -230,7 +233,15 @@ void NicolasCage::move_caret_h(int amount) {
 // WndProc(SCK_LEFT, 0, 0);
 
 void NicolasCage::move_caret_v(int amount) {
-  auto [x, y] = get_carret_pos();
+  auto [_, y] = get_carret_pos();
+
+  y = y + amount;
+  int line_count = WndProc(SCI_GETLINECOUNT, 0, 0);
+  y = std::clamp(y, 0, line_count - 1);
+  int line_width = WndProc(SCI_GETLINE, y, 0);
+  int x = min(this->prefered_column, line_width - 1);
+  set_carret_pos({x, y}, 0);
+  return;
   let pos = WndProc(SCI_POSITIONFROMPOINT, x, y + amount);
   WndProc(SCI_SETCURRENTPOS, pos, pos);
   return;
