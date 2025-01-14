@@ -42,6 +42,7 @@ editor::editor(const TRect &bounds, std::string text)
   insert(m_interior);
 }
 void editor::handleEvent(TEvent &event) {
+  bool processed = false;
   if (event.what == evKeyDown) {
 
     // std::cout << "editor::handleEvent: " << event.keyDown.keyCode << std::endl;
@@ -76,6 +77,7 @@ void editor::handleEvent(TEvent &event) {
   }
   m_interior->draw();
   m_interior->handleEvent(event);
+  TWindow::handleEvent(event);
 }
 
 editor_interior::editor_interior(const TRect &bounds, TScrollBar *aHScrollBar,
@@ -155,7 +157,8 @@ void editor_interior::draw() // modified for scroller
     std::vector<cell> line_text;
     if (h + first_line < line_count) {
       line_text = m_nick->get_styled_line(h + first_line);
-      auto spaces = std::vector<cell>(size.x - line_text.size(), {' ', 0});
+      int rest_line_len = max(0, size.x - line_text.size());
+      auto spaces = std::vector<cell>(rest_line_len, {' ', 0});
       line_text.insert(line_text.end(), spaces.begin(), spaces.end());
     } else {
       line_text = std::vector<cell>(size.x, {' ', 0});
@@ -169,9 +172,9 @@ void editor_interior::draw() // modified for scroller
 
     writeLine(0, h, line_text.size(), 1, b);
 
-    std::string margin_text = m_nick->get_margin_text(h);
-    // margin_text = "XY";
-    // if (h == 0) std::cout << "margin_text: " << margin_text << "__" << std::endl;
+    // std::string margin_text = m_nick->get_margin_text(h);
+    //  margin_text = "XY";
+    //  if (h == 0) std::cout << "margin_text: " << margin_text << "__" << std::endl;
 
     // for (int i = 0; i < margin_text.size(); i++) {
     // char c = margin_text[i];
