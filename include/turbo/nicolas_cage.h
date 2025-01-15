@@ -1,11 +1,8 @@
 #pragma once
 #include "scintilla/include/Scintilla.h"
 #include "scintilla/internals.h"
-#include "scintilla/lexlib/LexerModule.h"
 #include "scintilla/src/ScintillaBase.h"
 #include <array>
-#include <iostream>
-#include <type_traits>
 
 // represeents a character with style(color)
 struct cell {
@@ -93,6 +90,7 @@ class NicolasCage : public ScintillaBase {
   int get_line_count();
   // Moves the cursor horizontally by `amount` characters
   void move_caret_h(int amount);
+  void move_caret_h_word(int amount);
   // Moves the cursor vertically by `amount` lines
   void move_caret_v(int amount);
   // Returns the current position of the cursor

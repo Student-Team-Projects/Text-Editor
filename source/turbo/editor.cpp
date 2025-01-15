@@ -65,6 +65,12 @@ void editor::handleEvent(TEvent &event) {
     if (event.keyDown.keyCode == kbDown) {
       m_interior->m_nick->move_caret_v(1);
     }
+    if (event.keyDown.keyCode == kbCtrlLeft) {
+      m_interior->m_nick->move_caret_h_word(-1);
+    }
+    if (event.keyDown.keyCode == kbCtrlRight) {
+      m_interior->m_nick->move_caret_h_word(1);
+    }
     for (auto ch : event.keyDown.getText()) {
       if (isprint(ch)) m_interior->m_nick->insert_char(ch);
       // if (ch == '\n') m_interior->m_nick->insert_char('\n');

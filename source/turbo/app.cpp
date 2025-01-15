@@ -91,14 +91,15 @@ auto t_hello_app::initMenuBar(TRect rect) -> TMenuBar * {
 
 auto t_hello_app::initStatusLine(TRect rect) -> TStatusLine * {
   rect.a.y = rect.b.y - 1;
-  return new TStatusLine(rect, *new TStatusDef(0, 0xFFFF) +
-                                   *new TStatusItem("~Alt-X~ Exit", kbAltX, cmQuit) +
-                                   *new TStatusItem("~Ctrl-Shift-V~ Paste", 0, 0) +
-                                   *new TStatusItem("~Ctrl-Shift-C~ Copy line", 0, 0) +
-                                   *new TStatusItem("~Ctrl-Shift-X~ Cut line", 0, 0) +
-                                   *new TStatusItem("~Ctrl-Z~ Undo", 0, 0) +
-                                   *new TStatusItem("~Ctrl-Y~ Redo", 0, 0) +
-                                   *new TStatusItem(nullptr, kbF10, cmMenu));
+  return new TStatusLine(
+      rect, *new TStatusDef(0, 0xFFFF) + *new TStatusItem("~Alt-X~ Exit", kbAltX, cmQuit) +
+                *new TStatusItem("~Ctrl-V~ Paste", 0, 0) +
+                *new TStatusItem("~Ctrl-C~ Copy line", 0, 0) +
+                *new TStatusItem("~Ctrl-X~ Cut line", 0, 0) +
+                *new TStatusItem("~Ctrl-Z~ Undo", 0, 0) +
+                *new TStatusItem("~Ctrl-Y~ Redo", 0, 0) +
+                *new TStatusItem("~Ctrl-Left, Ctrl-Right~ Word jumps", 0, 0) +
+                *new TStatusItem(nullptr, kbF10, cmMenu));
 }
 
 auto t_hello_app::idle() -> void {

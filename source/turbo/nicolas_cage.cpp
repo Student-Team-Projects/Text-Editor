@@ -227,6 +227,18 @@ void NicolasCage::move_caret_h(int amount) {
   WndProc(SCI_SCROLLCARET, 0, 0);
   this->prefered_column = get_carret_pos()[0];
 }
+
+void NicolasCage::move_caret_h_word(int amount) {
+  if (amount > 0) {
+    for (int i = 0; i < amount; i++) {
+      KeyCommand(SCI_WORDRIGHT);
+    }
+  } else {
+    for (int i = 0; i < -amount; i++) {
+      KeyCommand(SCI_WORDLEFT);
+    }
+  }
+}
 // if (amount > 0)
 // WndProc(SCK_RIGHT, 0, 0);
 // else

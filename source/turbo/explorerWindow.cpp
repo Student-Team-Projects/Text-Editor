@@ -85,7 +85,9 @@ auto t_explorer_outline::populate_directory(TNode *node) -> void {
     file_add(node, entry.path().filename().string());
   }
 }
-auto t_explorer_outline::get_focused() -> TNode * { return getNode(foc); }
+auto t_explorer_outline::get_focused() -> TNode * {
+  return getNode(foc);
+}
 auto t_explorer_outline::node_to_path(TNode *node) -> std::string {
   std::vector<std::string> path;
   while (node != nullptr) {
