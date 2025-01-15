@@ -3,6 +3,7 @@
 #include <array>
 #include <cstdlib>
 #include <fstream>
+#include <iterator>
 #include <turbo/nicolas_cage.h>
 #include <iostream>
 
@@ -140,7 +141,27 @@ void NicolasCage::redo() {
 }
 
 void NicolasCage::paste() {
-  WndProc(SCI_PASTE, 0, 0);
+  std::string file = "nicolas_temp_cage";
+  std::string command = "xsel --clipboard > " + file;
+  system(command.c_str());
+
+  std::ifstream fileToView(file);
+  std::string all_text = "";
+
+  if (!fileToView) {
+    all_text += "file not found, file was: " + file;
+  } else {
+    char buf[1000];
+    while (fileToView.getline(buf, 1000)) {
+      all_text += buf;
+      all_text += "\n";
+    }
+  }
+
+  WndProc(SCI_ADDTEXT, all_text.size(), reinterpret_cast<sptr_t>(all_text.c_str()));
+
+
+  // WndProc(SCI_PASTE, 0, 0);
 }
 
 void NicolasCage::copy() {
@@ -149,7 +170,15 @@ void NicolasCage::copy() {
   let line_start = WndProc(SCI_POSITIONFROMLINE, y, 0);
   let line_end = WndProc(SCI_GETLINEENDPOSITION, y, 0);
   // std::cout << "line_start: " << line_start << " line_end: " << line_end << std::endl;
-  WndProc(SCI_COPYRANGE, line_start, line_end);
+  // WndProc(SCI_COPYRANGE, line_start, line_end);
+
+
+  std::string line = get_line(y);
+  // std::cout << "line: " << line << std::endl;
+  std::string command = "echo \"" + line + "\" | xsel --clipboard";
+  //  std::cout << "command: " << command << std::endl;
+  system(command.c_str());
+
   // WndProc(SCI_COPYALLOWLINE, 0, 0);
 }
 
