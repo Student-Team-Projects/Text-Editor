@@ -1,3 +1,4 @@
+#include "turbo/editorWindow.hpp"
 #include <algorithm>
 #include <filesystem>
 #include <iostream>
@@ -70,8 +71,9 @@ auto t_hello_app::handleEvent(TEvent &event) -> void {
       if (file.back() == '/') {
         file.pop_back();
       }
+      std::filesystem::path path(file);
       // std::cout << "open_file_in_editor: " << file << std::endl;
-      m_editor = new editor(deskTop->getExtent(), file);
+      m_editor = new editorWindow(deskTop->getExtent(), path);
       deskTop->insert(m_editor);
       break;
     }

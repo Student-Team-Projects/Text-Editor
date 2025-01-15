@@ -14,7 +14,7 @@
 #include <functional>
 #include <string>
 #include <turbo/app.hpp>
-#include <turbo/editor.hpp>
+#include <turbo/editorWindow.hpp>
 #include <turbo/explorerWindow.hpp>
 #include <tvision/tv.h>
 #include <tvision/util.h>

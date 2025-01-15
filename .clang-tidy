@@ -29,8 +29,21 @@ CheckOptions:
     #is required to use scintilla so why would I prohibit it
   - key: "cppcoreguidelines-pro-type-reinterpret-cast"
     value: 'false'
-  - key: "cppcoreguidelines-avoid-magic-numbers.WarnOnNumericalConstants"
+    # too tiring 
+  - key: "cppcoreguidelines-avoid-magic-numbers.IgnoredIntegerValues"
+    value: 'true'
+  - key: "cppcoreguidelines-avoid-magic-numbers.IgnoreAllFloatingPointValues"
+    value: 'true'
+  - key: "cppcoreguidelines-avoid-magic-numbers.IgnoreBitFieldsWidths"
+    value: 'true'
+    # I really dont wont to type int16 instead of short
+  - key: "google-runtime-int"
     value: 'false'
+    # yeaaaa ( I think pointer conditions are neet one can write if let with them)
+  - ken: "readability-implicit-bool-conversion.AllowIntegerConditions"
+    value: 'true'
+  - key: "readability-implicit-bool-conversion.AllowPointerConditions"
+    value: 'true'
   ### end of matra edit
 
 

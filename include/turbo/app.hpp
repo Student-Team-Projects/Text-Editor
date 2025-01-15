@@ -1,6 +1,6 @@
 #pragma once
 
-#include "turbo/editor.hpp"
+#include "turbo/editorWindow.hpp"
 #define Uses_TKeys
 #define Uses_TApplication
 #define Uses_TEvent
@@ -38,5 +38,5 @@ class t_hello_app : public TApplication {
   static void greeting_box();
   t_clock_view *m_clock;
   t_explorer_window *m_explorer;
-  editor *m_editor;
+  editorWindow *m_editor;
 };
