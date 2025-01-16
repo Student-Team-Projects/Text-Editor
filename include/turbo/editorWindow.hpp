@@ -7,7 +7,7 @@
 
 #include <turbo-core/fileWatcher.hpp>
 #include <tvision/tv.h>
-#include <turbo/nicolas_cage.h>
+#include <turbo/sciAdapter.hpp>
 
 
 class editorView : public TScroller {
@@ -26,7 +26,7 @@ class editorView : public TScroller {
   void open_file(path const &filename);
 
   private:
-  NicolasCage *m_nick;
+  SciAdapter *m_adapter;
   TPalette m_palette;
 };
 

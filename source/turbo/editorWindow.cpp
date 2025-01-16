@@ -6,7 +6,7 @@
 #include <tvision/tv.h>
 #include <tvision/util.h>
 
-#include <turbo/nicolas_cage.h>
+#include <turbo/sciAdapter.hpp>
 #define Uses_IfStreamGetLine
 
 editorWindow::editorWindow(const TRect &bounds, const path &filename)
@@ -29,7 +29,7 @@ void editorWindow::handleEvent(TEvent &event) {
 editorView::editorView(const TRect &bounds, TScrollBar *aHScrollBar,
                        TScrollBar *aVScrollBar)
     : TScroller(bounds, aHScrollBar, aVScrollBar), m_palette((char *)0, 0),
-      m_nick(new NicolasCage()) {
+      m_adapter(new SciAdapter()) {
 
   growMode = gfGrowHiX | gfGrowHiY;
   options = options | ofFramed;
@@ -42,10 +42,9 @@ editorView::editorView(const TRect &bounds, TScrollBar *aHScrollBar,
 
 void editorView::open_file(const path &filename) {
   if (filename.empty()) {
-    m_nick->new_file();
     return;
   }
-  m_nick->load_file(filename);
+  m_adapter->load_file(filename);
 }
 
 void editorView::handleEvent(TEvent &event) {
@@ -55,43 +54,43 @@ void editorView::handleEvent(TEvent &event) {
 
     switch (event.keyDown.keyCode) {
     case kbCtrlV:
-      m_nick->paste();
+      m_adapter->paste();
       break;
     case kbCtrlC:
-      m_nick->copy();
+      m_adapter->copy();
       break;
     case kbCtrlX:
-      m_nick->cut();
+      m_adapter->cut();
       break;
     case kbCtrlZ:
-      m_nick->undo();
+      m_adapter->undo();
       break;
     case kbCtrlY:
-      m_nick->redo();
+      m_adapter->redo();
       break;
     case 7181:
-      m_nick->insert_char('\n');
+      m_adapter->insert_char('\n');
       break;
     case kbBack:
-      m_nick->delete_char();
+      m_adapter->delete_char();
       break;
     case kbLeft:
-      m_nick->move_caret_h(-1);
+      m_adapter->move_cursor_h(-1);
       break;
     case kbRight:
-      m_nick->move_caret_h(1);
+      m_adapter->move_cursor_h(1);
       break;
     case kbUp:
-      m_nick->move_caret_v(-1);
+      m_adapter->move_cursor_v(-1);
       break;
     case kbDown:
-      m_nick->move_caret_v(1);
+      m_adapter->move_cursor_v(1);
       break;
     case kbCtrlLeft:
-      m_nick->move_caret_h_word(-1);
+      m_adapter->move_cursor_h_word(-1);
       break;
     case kbCtrlRight:
-      m_nick->move_caret_h_word(1);
+      m_adapter->move_cursor_h_word(1);
       break;
     default:
       handled = false;
@@ -100,7 +99,7 @@ void editorView::handleEvent(TEvent &event) {
         handled = true;
       }
       for (auto ch : event.keyDown.getText()) {
-        if (isprint(ch)) m_nick->insert_char(ch);
+        if (isprint(ch)) m_adapter->insert_char(ch);
       }
       break;
     }
@@ -110,31 +109,31 @@ void editorView::handleEvent(TEvent &event) {
   }
 
   if (event.what == evMouseDown) {
-    m_nick->set_carret_pos({event.mouse.where.x - 1, event.mouse.where.y - 2});
+    m_adapter->set_cursor_pos({event.mouse.where.x - 1, event.mouse.where.y - 2});
     clearEvent(event);
   }
 
-  // if (m_nick->get_carret_pos()[1] > size.y) {
+  // if (m_adapter->get_cursor_pos()[1] > size.y) {
   // delta.y++;
-  //// m_nick->handleEvent(event);
+  //// m_adapter->handleEvent(event);
   //}
 
-  m_nick->colorize();
+  m_adapter->colorize();
   draw();
 }
 
 void editorView::draw() // modified for scroller
 {
-  auto line_count = m_nick->get_line_count();
-  auto [x, y] = m_nick->get_carret_pos();
-  int first_line = m_nick->get_first_line();
+  auto line_count = m_adapter->get_line_count();
+  auto [x, y] = m_adapter->get_cursor_pos();
+  int first_line = m_adapter->get_first_line_idx();
 
   // drawing lines
   for (short y_pos = 0; y_pos < size.y; y_pos++) {
     std::vector<cell> line_text;
 
     if (y_pos + first_line < line_count) {
-      line_text = m_nick->get_styled_line(y_pos + first_line);
+      line_text = m_adapter->get_styled_line(y_pos + first_line);
       int rest_line_len = max(0, size.x - line_text.size());
       auto spaces = std::vector<cell>(rest_line_len, {' ', 0});
       line_text.insert(line_text.end(), spaces.begin(), spaces.end());
@@ -153,7 +152,7 @@ void editorView::draw() // modified for scroller
   }
 
   // drawing cursor
-  char cursor_char = m_nick->get_char_at({x, y});
+  char cursor_char = m_adapter->get_char_at({x, y});
   if (!isprint(cursor_char)) cursor_char = ' ';
   writeChar(x, y - first_line, cursor_char, getColor(0x0100), 1);
 }

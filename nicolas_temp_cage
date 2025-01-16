@@ -1,1 +1,1 @@
-//m Copyright 2019 by Neil Hodgson <neilh@scintilla.org>
+extern const LexerModule lmASY;
