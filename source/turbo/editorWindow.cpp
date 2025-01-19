@@ -1,5 +1,6 @@
 #include <cassert>
 #include <cstring>
+#include <iostream>
 #include <turbo/app.hpp>
 #include <turbo/editorWindow.hpp>
 #include <turbo/explorerWindow.hpp>
@@ -92,6 +93,9 @@ void editorView::handleEvent(TEvent &event) {
     case kbCtrlRight:
       m_adapter->move_cursor_h_word(1);
       break;
+    case kbCtrlM:
+      m_adapter->toggle_selection_mode();
+      break;
     default:
       handled = false;
 
@@ -107,11 +111,18 @@ void editorView::handleEvent(TEvent &event) {
       clearEvent(event);
     }
   }
-
   if (event.what == evMouseDown) {
     m_adapter->set_cursor_pos({event.mouse.where.x - 1, event.mouse.where.y - 2});
-    clearEvent(event);
+    m_adapter->set_selection_mode(0);
+    // clearEvent(event);
   }
+  if (event.what == evMouseMove) {
+    if (event.mouse.buttons == 1) {
+      m_adapter->set_selection_mode(1);
+      m_adapter->set_cursor_pos({event.mouse.where.x - 1, event.mouse.where.y - 2});
+    }
+  }
+
 
   // if (m_adapter->get_cursor_pos()[1] > size.y) {
   // delta.y++;
@@ -124,10 +135,19 @@ void editorView::handleEvent(TEvent &event) {
 
 void editorView::draw() // modified for scroller
 {
+
+// The colors of the background in rgb
+#define COL_NORMAL 0xe0'e0'e0
+#define COL_CURRENT_LINE 0xe0'f0'ff
+#define COL_SELECTION 0xff'ff'ff
+
   auto line_count = m_adapter->get_line_count();
   auto [x, y] = m_adapter->get_cursor_pos();
   int first_line = m_adapter->get_first_line_idx();
 
+  auto [sel_start, sel_end] = m_adapter->selection_points();
+
+  int pos = 0;
   // drawing lines
   for (short y_pos = 0; y_pos < size.y; y_pos++) {
     std::vector<cell> line_text;
@@ -142,10 +162,33 @@ void editorView::draw() // modified for scroller
     }
 
     TDrawBuffer buf;
-
+    int line_start_pos = 0;
     for (int i = 0; i < line_text.size(); i++) {
       auto style = line_text[i].style;
-      buf.moveChar(i, line_text[i].character, style, 1);
+      // std::cout << "Style: " << (int)style;
+      //   auto tcolor = style;
+      // auto tcolor = m_adapter->style_to_color(style);
+      TColorDesired fg = style;
+      TColorDesired bg = y == y_pos + first_line ? COL_CURRENT_LINE : COL_NORMAL;
+      if (sel_start[1] == sel_end[1] && y_pos == sel_start[1]) {
+        if (i >= sel_start[0] && i < sel_end[0]) bg = COL_SELECTION;
+      } else {
+        if (y_pos == sel_start[1] && i >= sel_start[0]) {
+          bg = COL_SELECTION;
+        }
+        if (y_pos == sel_end[1] && i < sel_end[0]) {
+          bg = COL_SELECTION;
+        }
+        if (y_pos > sel_start[1] && y_pos < sel_end[1]) {
+          bg = COL_SELECTION;
+        }
+      }
+      // if (pos >= sel_start && pos < sel_end) {
+      // bg = COL_SELECTION;
+      //}
+      TColorAttr tcolor(fg, bg);
+      buf.moveChar(i, line_text[i].character, tcolor, 1);
+      pos++;
     }
 
     writeLine(0, y_pos, line_text.size(), 1, buf);

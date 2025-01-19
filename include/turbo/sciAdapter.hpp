@@ -18,6 +18,7 @@ class SciAdapter : private ScintillaBase {
 
   using path = std::filesystem::path;
 
+
   private:
   void SetVerticalScrollPos() override {}
   void SetHorizontalScrollPos() override {}
@@ -78,6 +79,7 @@ class SciAdapter : private ScintillaBase {
   // THer following is written by human being (matra)
 
   public:
+  SciAdapter();
   // Reads the content of the file with path `filename` and loads it into the document
   void load_file(const path &filename);
 
@@ -127,7 +129,16 @@ class SciAdapter : private ScintillaBase {
   static std::map<std::string, int> extension_to_lexerId;
   static const std::vector<const Scintilla::LexerModule *> lexers;
 
+  TColorAttr style_to_color(int style);
+
+  std::array<int, 2> selection_range();
+  std::array<std::array<int, 2>, 2> selection_points();
+
+  int toggle_selection_mode();
+  void set_selection_mode(int mode);
+
   private:
+  void remove_seleted_and_exit();
   // initializes all the settrings
   void init_scintilla();
   // given a file name, returns the lexer that should be used to colorize the file
@@ -135,6 +146,7 @@ class SciAdapter : private ScintillaBase {
   // The column that the cursor before when moved to the line with less characters. When it
   // moves to a line with more characters, it will be the same as the column of the cursor
   int m_prefered_column;
+  int m_selection_mode;
 };
 } // namespace Scintilla
 

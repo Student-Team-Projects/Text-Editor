@@ -101,6 +101,7 @@ auto t_hello_app::initStatusLine(TRect rect) -> TStatusLine * {
                 *new TStatusItem("~Ctrl-Z~ Undo", 0, 0) +
                 *new TStatusItem("~Ctrl-Y~ Redo", 0, 0) +
                 *new TStatusItem("~Ctrl-Left, Ctrl-Right~ Word jumps", 0, 0) +
+                *new TStatusItem("~Ctrl-M~ toggle selection", 0, 0) +
                 *new TStatusItem(nullptr, kbF10, cmMenu));
 }
 

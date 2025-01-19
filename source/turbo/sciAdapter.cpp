@@ -9,6 +9,7 @@
 #include <cstring>
 #include <filesystem>
 #include <fstream>
+#include <iostream>
 #include <string>
 #include <turbo/app.hpp>
 #include <turbo/editorWindow.hpp>
@@ -33,6 +34,10 @@ const std::vector<const Scintilla::LexerModule *> SciAdapter::lexers = {
     &lmCPP, &lmPython, &lmNull, &lmAsm, &lmBash};
 
 
+SciAdapter::SciAdapter() {
+  init_scintilla();
+}
+
 void SciAdapter::init_scintilla() {
   // WndProc(SCI_SETYCARETPOLICY, CARET_STRICT | CARET_EVEN, 10);
   // WndProc(SCI_SETVIEWEOL, 0, 0);
@@ -42,8 +47,10 @@ void SciAdapter::init_scintilla() {
   WndProc(SCI_SETMARGINTYPEN, 0, SC_MARGIN_NUMBER);
   WndProc(SC_MARGIN_TEXT, 0, 0);
   WndProc(SCI_MARGINSETTEXT, 1, reinterpret_cast<sptr_t>("0"));
+  WndProc(SCI_STYLERESETDEFAULT, 0, 0);
 
   this->m_prefered_column = 0;
+  this->m_selection_mode = 0;
   //   WndProc(SCI_SETWRAPMODE, SC_WRAP_WORD, 0);
   //   WndProc(SCI_SETMARGINLEFT, 0, 0);
   ////WndProc(SCI_SETMARGINRIGHT, 0, 0);
@@ -56,6 +63,22 @@ void SciAdapter::init_scintilla() {
   //{'H', 0}, {'e', 1}, {'l', 2}, {'l', 3}, {'o', 4},
   //       };
   //        WndProc(SCI_ADDSTYLEDTEXT, 10, reinterpret_cast<sptr_t>(s));
+
+  WndProc(SCI_STYLESETFORE, 0, 0x0000ff);
+  WndProc(SCI_STYLESETBACK, 0, 0xaa0000);
+  WndProc(SCI_STYLESETFORE, 117, 0x00ff00);
+  WndProc(SCI_STYLESETBACK, 117, 0x00aa00);
+
+  // WndProc(SCI_SETE, SC_ELEMENT_CURET, 0x00ff00);
+
+  WndProc(SCI_SETCARETSTYLE, CARETSTYLE_BLOCK, 0);
+  // WndProc(SCI_SETANCHOR, 0, 0);
+  // int buf_size = 1 + WndProc(SCI_GETSELTEXT, 0, 0);
+  // char *buf = (char *)calloc(buf_size, sizeof(char));
+  // WndProc(SCI_GETSELTEXT, 0, reinterpret_cast<sptr_t>(buf));
+  // WndProc(SCI_SETSELBACK, true, 20);
+  // WndProc(SCI_SETCARETFORE, 0x9900ff, 0);
+  // std::cout << " selected_text: " << buf << "-end" << std::endl;
 }
 
 void SciAdapter::load_file(const path &filename) {
@@ -128,12 +151,18 @@ char SciAdapter::get_char_at(std::array<int, 2> pos) {
 }
 
 void SciAdapter::insert_char(char ch) {
+
+  remove_seleted_and_exit();
   char text[2] = {ch, 0};
   WndProc(SCI_ADDTEXT, 1, reinterpret_cast<sptr_t>(text));
   WndProc(SCI_COLOURISE, 0, -1);
 }
 
 void SciAdapter::delete_char() {
+  if (this->m_selection_mode) {
+    remove_seleted_and_exit();
+    return;
+  }
   auto pos = WndProc(SCI_GETCURRENTPOS, 0, 0);
   WndProc(SCI_DELETERANGE, pos - 1, 1);
 }
@@ -200,7 +229,7 @@ void SciAdapter::paste() {
       all_text += "\n";
     }
   }
-
+  remove_seleted_and_exit();
   WndProc(SCI_ADDTEXT, all_text.size(), reinterpret_cast<sptr_t>(all_text.c_str()));
 }
 
@@ -210,22 +239,40 @@ void SciAdapter::copy() {
   auto line_end = WndProc(SCI_GETLINEENDPOSITION, y, 0);
 
   std::string line = get_line(y);
+
+  if (this->m_selection_mode == 1) {
+    int buf_size = 1 + WndProc(SCI_GETSELTEXT, 0, 0);
+    char *buf = (char *)calloc(buf_size, sizeof(char));
+    WndProc(SCI_GETSELTEXT, 0, reinterpret_cast<sptr_t>(buf));
+    line = std::string(buf);
+  }
   std::string command = "echo \"" + line + "\" | xsel --clipboard";
   system(command.c_str());
 }
 
 void SciAdapter::cut() {
+
   auto [x, y] = get_cursor_pos();
   auto line_start = WndProc(SCI_POSITIONFROMLINE, y, 0);
   auto line_end = WndProc(SCI_GETLINEENDPOSITION, y, 0);
   copy();
+
+  if (this->m_selection_mode == 1) {
+    remove_seleted_and_exit();
+    return;
+  }
+
   WndProc(SCI_DELETERANGE, line_start, line_end - line_start + 1);
 }
 
 
 void SciAdapter::move_cursor_h(int direction) {
   auto pos = WndProc(SCI_GETCURRENTPOS, 0, 0);
-  WndProc(SCI_SETCURRENTPOS, pos + direction, 0);
+  if (this->m_selection_mode) {
+    WndProc(SCI_SETCURRENTPOS, pos + direction, 0);
+  } else {
+    WndProc(SCI_GOTOPOS, pos + direction, 0);
+  }
   WndProc(SCI_SCROLLCARET, 0, 0);
   this->m_prefered_column = get_cursor_pos()[0];
 }
@@ -236,6 +283,10 @@ void SciAdapter::move_cursor_h_word(int direction) {
   } else {
     KeyCommand(SCI_WORDLEFT);
   }
+  if (this->m_selection_mode == 0) {
+    int pos = WndProc(SCI_GETCURRENTPOS, 0, 0);
+    WndProc(SCI_SETSEL, -1, pos);
+  }
   this->m_prefered_column = get_cursor_pos()[0];
 }
 
@@ -243,11 +294,17 @@ void SciAdapter::move_cursor_v(int direction) {
   auto [_, y] = get_cursor_pos();
 
   int line_count = WndProc(SCI_GETLINECOUNT, 0, 0);
-  int line_width = WndProc(SCI_GETLINE, y, 0);
 
   y = std::clamp(y + direction, 0, line_count - 1);
+  int line_width = WndProc(SCI_GETLINE, y, 0);
+
   int x = min(this->m_prefered_column, line_width - 1);
   set_cursor_pos({x, y}, 0);
+
+  if (this->m_selection_mode == 0) {
+    int pos = WndProc(SCI_GETCURRENTPOS, 0, 0);
+    WndProc(SCI_SETSEL, -1, pos);
+  }
 }
 
 void SciAdapter::colorize() {
@@ -261,6 +318,54 @@ std::string SciAdapter::get_margin_text(int line) {
   std::string res((char *)buf);
   return res;
 }
+
+TColorAttr SciAdapter::style_to_color(int style) {
+  TColorDesired fg = (int)WndProc(SCI_STYLEGETFORE, style, 0);
+  TColorDesired bg = (int)WndProc(SCI_STYLEGETBACK, style, 0);
+  return TColorAttr(fg, bg);
+}
+
+std::array<int, 2> SciAdapter::selection_range() {
+  int start = WndProc(SCI_GETSELECTIONSTART, 0, 0);
+  int end = WndProc(SCI_GETSELECTIONEND, 0, 0);
+  return {start, end};
+}
+
+std::array<std::array<int, 2>, 2> SciAdapter::selection_points() {
+  auto start = WndProc(SCI_GETSELECTIONSTART, 0, 0);
+  auto end = WndProc(SCI_GETSELECTIONEND, 0, 0);
+  int x_start = WndProc(SCI_GETCOLUMN, start, 0);
+  int y_start = WndProc(SCI_LINEFROMPOSITION, start, 0);
+  int x_end = WndProc(SCI_GETCOLUMN, end, 0);
+  int y_end = WndProc(SCI_LINEFROMPOSITION, end, 0);
+  return {std::array<int, 2>{x_start, y_start}, {x_end, y_end}};
+}
+
+int SciAdapter::toggle_selection_mode() {
+  this->m_selection_mode = !this->m_selection_mode;
+
+  if (this->m_selection_mode == 0) {
+    int pos = WndProc(SCI_GETCURRENTPOS, 0, 0);
+    WndProc(SCI_SETSEL, -1, pos);
+  }
+  return this->m_selection_mode;
+}
+void SciAdapter::set_selection_mode(int mode) {
+  this->m_selection_mode = mode;
+  if (this->m_selection_mode == 0) {
+    int pos = WndProc(SCI_GETCURRENTPOS, 0, 0);
+    WndProc(SCI_SETSEL, -1, pos);
+  }
+}
+
+void SciAdapter::remove_seleted_and_exit() {
+  if (this->m_selection_mode) {
+    auto [start, end] = selection_range();
+    WndProc(SCI_DELETERANGE, start, end - start);
+    this->m_selection_mode = 0;
+  }
+}
+
 
 // void SciAdapter::new_file() {
 // auto text = "Garter, if you're gonna act like a baby,\n you might as well crawl back up
