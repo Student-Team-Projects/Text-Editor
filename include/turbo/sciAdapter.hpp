@@ -123,26 +123,35 @@ class SciAdapter : private ScintillaBase {
   // Returns the text of the margin of the line `line`
   [[nodiscard]] std::string get_margin_text(int line);
 
+  // Toggles the selection mode. On means that any cursor move will update the selection,
+  // Off means there currently is no selection. Also returns the set mode
+  int toggle_selection_mode();
+  // Similar to `toggle_selection_mode` but sets the selection mode
+  void set_selection_mode(int mode);
+  // Returns pair of points - beginning and end of the selection
+  [[nodiscard]] std::array<std::array<int, 2>, 2> selection_points();
+
+
   // updates the lexer
   void colorize();
+  // Given scintilla style index returns turobo TColorAttr representing this style
+  [[nodiscard]] TColorAttr style_to_color(int style);
+
 
   static std::map<std::string, int> extension_to_lexerId;
   static const std::vector<const Scintilla::LexerModule *> lexers;
 
-  TColorAttr style_to_color(int style);
-
-  std::array<int, 2> selection_range();
-  std::array<std::array<int, 2>, 2> selection_points();
-
-  int toggle_selection_mode();
-  void set_selection_mode(int mode);
 
   private:
+  // Removes the selected text and exits the selection mode
   void remove_seleted_and_exit();
   // initializes all the settrings
   void init_scintilla();
   // given a file name, returns the lexer that should be used to colorize the file
   [[nodiscard]] const Scintilla::LexerModule *get_lexer(const path &filename);
+  // Similar to `selection_points` but returns pair of scintilla positions
+  [[nodiscard]] std::array<int, 2> selection_range();
+
   // The column that the cursor before when moved to the line with less characters. When it
   // moves to a line with more characters, it will be the same as the column of the cursor
   int m_prefered_column;
