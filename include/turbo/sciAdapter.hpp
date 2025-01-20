@@ -5,6 +5,8 @@
 #include "scintilla/src/ScintillaBase.h"
 #include <array>
 #include <filesystem>
+#include <iostream>
+#include <set>
 
 // represeents a character with style(color)
 struct cell {
@@ -29,7 +31,7 @@ class SciAdapter : private ScintillaBase {
   void Paste() override {}
   void ClaimSelection() override {}
   void NotifyChange() override {}
-  void NotifyParent(SCNotification scn) override {}
+  void NotifyParent(SCNotification scn) override;
   void CopyToClipboard(const SelectionText &selectedText) override {}
   void SetMouseCapture(bool on) override {}
   bool HaveMouseCapture() override {
@@ -137,6 +139,7 @@ class SciAdapter : private ScintillaBase {
   // Given scintilla style index returns turobo TColorAttr representing this style
   [[nodiscard]] TColorAttr style_to_color(int style);
 
+  std::set<int> get_changed_lines();
 
   static std::map<std::string, int> extension_to_lexerId;
   static const std::vector<const Scintilla::LexerModule *> lexers;
@@ -156,6 +159,7 @@ class SciAdapter : private ScintillaBase {
   // moves to a line with more characters, it will be the same as the column of the cursor
   int m_prefered_column;
   int m_selection_mode;
+  std::set<int> m_changed_lines;
 };
 } // namespace Scintilla
 

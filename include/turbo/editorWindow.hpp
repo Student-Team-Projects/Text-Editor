@@ -18,6 +18,7 @@ class editorView : public TScroller {
   editorView(const TRect &bounds, TScrollBar *aHScrollBar, TScrollBar *aVScrollBar);
 
   void draw() override;
+  void m_draw();
 
   void handleEvent(TEvent &event) override;
   // TPalette &getPalette() const override;
@@ -25,7 +26,10 @@ class editorView : public TScroller {
   // Openes a file with path `filename`, if it is empty, opens a empty file
   void open_file(path const &filename);
 
-  private:
+  // The same as draw but only one line
+  void draw_line(int line);
+
+  // private:
   SciAdapter *m_adapter;
   TPalette m_palette;
 };

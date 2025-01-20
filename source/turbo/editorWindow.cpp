@@ -20,6 +20,7 @@ editorWindow::editorWindow(const TRect &bounds, const path &filename)
   m_interior->open_file(filename);
 
   insert(m_interior);
+  m_interior->m_adapter->colorize();
 }
 
 void editorWindow::handleEvent(TEvent &event) {
@@ -129,12 +130,86 @@ void editorView::handleEvent(TEvent &event) {
   //// m_adapter->handleEvent(event);
   //}
 
-  m_adapter->colorize();
+  // m_adapter->colorize();
   draw();
+  // for (int line : m_adapter->get_changed_lines()) {
+  // draw_line(line);
+  //}
 }
 
-void editorView::draw() // modified for scroller
-{
+
+void editorView::draw_line(int line) {
+  // std::cout << "line: " << line << std::endl;
+// The colors of the background in rgb
+#define COL_NORMAL 0xe0'e0'e0
+#define COL_CURRENT_LINE 0xe0'f0'ff
+#define COL_SELECTION 0xff'ff'ff
+
+  auto line_count = m_adapter->get_line_count();
+  auto [x, y] = m_adapter->get_cursor_pos();
+  int first_line = m_adapter->get_first_line_idx();
+
+  auto [sel_start, sel_end] = m_adapter->selection_points();
+
+  int pos = 0;
+  // drawing lines
+  int y_pos = line;
+  std::vector<cell> line_text;
+
+  if (y_pos + first_line < line_count) {
+    line_text = m_adapter->get_styled_line(y_pos + first_line);
+    int rest_line_len = max(0, size.x - line_text.size());
+    auto spaces = std::vector<cell>(rest_line_len, {' ', 0});
+    line_text.insert(line_text.end(), spaces.begin(), spaces.end());
+  } else {
+    line_text = std::vector<cell>(size.x, {' ', 0});
+  }
+
+  TDrawBuffer buf;
+  int line_start_pos = 0;
+  for (int i = 0; i < line_text.size(); i++) {
+    auto style = line_text[i].style;
+    // std::cout << "Style: " << (int)style;
+    //   auto tcolor = style;
+    // auto tcolor = m_adapter->style_to_color(style);
+    TColorDesired fg = style;
+    TColorDesired bg = y == y_pos + first_line ? COL_CURRENT_LINE : COL_NORMAL;
+    if (sel_start[1] == sel_end[1] && y_pos == sel_start[1]) {
+      if (i >= sel_start[0] && i < sel_end[0]) bg = COL_SELECTION;
+    } else {
+      if (y_pos == sel_start[1] && i >= sel_start[0]) {
+        bg = COL_SELECTION;
+      }
+      if (y_pos == sel_end[1] && i < sel_end[0]) {
+        bg = COL_SELECTION;
+      }
+      if (y_pos > sel_start[1] && y_pos < sel_end[1]) {
+        bg = COL_SELECTION;
+      }
+    }
+    // if (pos >= sel_start && pos < sel_end) {
+    // bg = COL_SELECTION;
+    //}
+    TColorAttr tcolor(fg, bg);
+    buf.moveChar(i, line_text[i].character, tcolor, 1);
+    pos++;
+  }
+
+  writeLine(0, y_pos, line_text.size(), 1, buf);
+
+  // drawing cursor
+  char cursor_char = m_adapter->get_char_at({x, y});
+  if (!isprint(cursor_char)) cursor_char = ' ';
+  writeChar(x, y - first_line, cursor_char, getColor(0x0100), 1);
+}
+
+
+void editorView::draw() {
+
+  for (int y_pos = 0; y_pos < size.y; y_pos++) {
+    draw_line(y_pos);
+  }
+  return;
 
 // The colors of the background in rgb
 #define COL_NORMAL 0xe0'e0'e0
