@@ -127,6 +127,7 @@ void SciAdapter::set_cursor_pos(std::array<int, 2> pos, bool set_m_prefered_colu
   this->m_changed_lines.insert(get_cursor_pos()[1]);
 
   auto [x, y] = pos;
+  // y += WndProc(SCI_GETFIRSTVISIBLELINE, 0, 0);
   auto line_len = WndProc(SCI_GETLINE, y, 0);
   auto lines_count = WndProc(SCI_GETLINECOUNT, 0, 0);
 
@@ -213,6 +214,13 @@ std::string SciAdapter::get_line(int line) {
   return res;
 }
 
+void SciAdapter::set_first_line_idx(int line) {
+  WndProc(SCI_SETFIRSTVISIBLELINE, line, 0);
+}
+
+void SciAdapter::scroll(int lines) {
+  WndProc(SCI_LINESCROLL, 0, lines);
+}
 
 void SciAdapter::undo() {
   WndProc(SCI_UNDO, 0, 0);
@@ -431,6 +439,7 @@ std::set<int> SciAdapter::get_changed_lines() {
   m_changed_lines.clear();
   return res;
 }
+
 
 // void SciAdapter::new_file() {
 // auto text = "Garter, if you're gonna act like a baby,\n you might as well crawl back up

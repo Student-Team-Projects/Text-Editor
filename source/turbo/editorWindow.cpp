@@ -113,15 +113,24 @@ void editorView::handleEvent(TEvent &event) {
     }
   }
   if (event.what == evMouseDown) {
-    m_adapter->set_cursor_pos({event.mouse.where.x - 1, event.mouse.where.y - 2});
+    auto y = m_adapter->get_first_line_idx();
+    m_adapter->set_cursor_pos({event.mouse.where.x - 1, y + event.mouse.where.y - 2});
     m_adapter->set_selection_mode(0);
     // clearEvent(event);
   }
+
   if (event.what == evMouseMove) {
     if (event.mouse.buttons == 1) {
       m_adapter->set_selection_mode(1);
-      m_adapter->set_cursor_pos({event.mouse.where.x - 1, event.mouse.where.y - 2});
+      auto y = m_adapter->get_first_line_idx();
+      m_adapter->set_cursor_pos({event.mouse.where.x - 1, y + event.mouse.where.y - 2});
     }
+  }
+
+  if (event.what == evMouseWheel) {
+    // std::cout << "Wheel: " << (int)event.mouse.wheel << std::endl;
+    m_adapter->scroll(event.mouse.wheel == 1 ? -1 : 1);
+  } else {
   }
 
 
@@ -131,12 +140,42 @@ void editorView::handleEvent(TEvent &event) {
   //}
 
   // m_adapter->colorize();
+  scroll_to_cursor();
   draw();
   // for (int line : m_adapter->get_changed_lines()) {
   // draw_line(line);
   //}
 }
 
+void editorView::scroll_to_cursor() {
+  auto [x, y] = m_adapter->get_cursor_pos();
+  int first_line = m_adapter->get_first_line_idx();
+  if (y < first_line) {
+    m_adapter->set_first_line_idx(y);
+  }
+  if (y > first_line + size.y - 1) {
+    m_adapter->set_first_line_idx(y - size.y + 1);
+  }
+}
+
+bool cell_selecetd(std::array<std::array<int, 2>, 2> sel, int x, int y) {
+  if (sel[0][1] == sel[1][1]) {
+    if (y == sel[0][1] && x >= sel[0][0] && x < sel[1][0]) {
+      return true;
+    }
+  } else {
+    if (y == sel[0][1] && x >= sel[0][0]) {
+      return true;
+    }
+    if (y == sel[1][1] && x < sel[1][0]) {
+      return true;
+    }
+    if (y > sel[0][1] && y < sel[1][1]) {
+      return true;
+    }
+  }
+  return false;
+}
 
 void editorView::draw_line(int line) {
   // std::cout << "line: " << line << std::endl;
@@ -174,19 +213,22 @@ void editorView::draw_line(int line) {
     // auto tcolor = m_adapter->style_to_color(style);
     TColorDesired fg = style;
     TColorDesired bg = y == y_pos + first_line ? COL_CURRENT_LINE : COL_NORMAL;
-    if (sel_start[1] == sel_end[1] && y_pos == sel_start[1]) {
-      if (i >= sel_start[0] && i < sel_end[0]) bg = COL_SELECTION;
-    } else {
-      if (y_pos == sel_start[1] && i >= sel_start[0]) {
-        bg = COL_SELECTION;
-      }
-      if (y_pos == sel_end[1] && i < sel_end[0]) {
-        bg = COL_SELECTION;
-      }
-      if (y_pos > sel_start[1] && y_pos < sel_end[1]) {
-        bg = COL_SELECTION;
-      }
+    if (cell_selecetd({sel_start, sel_end}, i, y_pos + first_line)) {
+      bg = COL_SELECTION;
     }
+    // if (sel_start[1] == sel_end[1] && y_pos == sel_start[1]) {
+    // if (i >= sel_start[0] && i < sel_end[0]) bg = COL_SELECTION;
+    //} else {
+    // if (y_pos == sel_start[1] && i >= sel_start[0]) {
+    // bg = COL_SELECTION;
+    //}
+    // if (y_pos == sel_end[1] && i < sel_end[0]) {
+    // bg = COL_SELECTION;
+    //}
+    // if (y_pos > sel_start[1] && y_pos < sel_end[1]) {
+    // bg = COL_SELECTION;
+    //}
+    //}
     // if (pos >= sel_start && pos < sel_end) {
     // bg = COL_SELECTION;
     //}

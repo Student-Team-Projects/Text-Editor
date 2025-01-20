@@ -100,12 +100,16 @@ class SciAdapter : private ScintillaBase {
 
   // reurnst the index of the first line to be print on the screen
   [[nodiscard]] int get_first_line_idx();
+  // srcolls the document so that the first visible line is `line`
+  void set_first_line_idx(int line);
   // Returns the number of lines in the document
   [[nodiscard]] int get_line_count();
   // Returns the line with number `line` in the document
   [[nodiscard]] std::string get_line(int line);
   // The same as get line but each character has a style
   [[nodiscard]] std::vector<cell> get_styled_line(int);
+  // Srolls the document up if `lines` is negative, down if positive
+  void scroll(int lines);
 
   void paste();
   void copy();
@@ -136,10 +140,14 @@ class SciAdapter : private ScintillaBase {
 
   // updates the lexer
   void colorize();
+
   // Given scintilla style index returns turobo TColorAttr representing this style
   [[nodiscard]] TColorAttr style_to_color(int style);
 
+  // Gets the list of lines that need to be redrawn
+  // Unused
   std::set<int> get_changed_lines();
+
 
   static std::map<std::string, int> extension_to_lexerId;
   static const std::vector<const Scintilla::LexerModule *> lexers;
@@ -150,6 +158,8 @@ class SciAdapter : private ScintillaBase {
   void remove_seleted_and_exit();
   // initializes all the settrings
   void init_scintilla();
+
+  void scroll_to_cursor();
   // given a file name, returns the lexer that should be used to colorize the file
   [[nodiscard]] const Scintilla::LexerModule *get_lexer(const path &filename);
   // Similar to `selection_points` but returns pair of scintilla positions
@@ -159,6 +169,9 @@ class SciAdapter : private ScintillaBase {
   // moves to a line with more characters, it will be the same as the column of the cursor
   int m_prefered_column;
   int m_selection_mode;
+
+  // Keeps track of lines that need to be redrawn
+  // unused
   std::set<int> m_changed_lines;
 };
 } // namespace Scintilla

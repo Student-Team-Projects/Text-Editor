@@ -28,6 +28,8 @@ class editorView : public TScroller {
 
   // The same as draw but only one line
   void draw_line(int line);
+  // sets the first visible line so that cursor is visible on the screen
+  void scroll_to_cursor();
 
   // private:
   SciAdapter *m_adapter;
