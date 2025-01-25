@@ -1,8 +1,8 @@
 #pragma once
-#include "scintilla/include/Scintilla.h"
-#include "scintilla/internals.h"
-#include "scintilla/lexlib/LexerModule.h"
-#include "scintilla/src/ScintillaBase.h"
+#include "../scintilla/include/Scintilla.h"
+#include "../sci-tui/internals.h"
+// #include "scintilla/lexlib/LexerModule.h"
+// #include "../scintilla/src/ScintillaBase.h"
 #include <array>
 #include <filesystem>
 #include <iostream>
@@ -14,14 +14,18 @@ struct cell {
   unsigned char style;
 };
 
+using namespace Scintilla;
+using namespace Scintilla::Internal;
+
 namespace Scintilla {
 
-class SciAdapter : private ScintillaBase {
+class SciAdapter : private Internal::ScintillaBase {
 
   using path = std::filesystem::path;
 
 
   private:
+  ~SciAdapter() override {}
   void SetVerticalScrollPos() override {}
   void SetHorizontalScrollPos() override {}
   bool ModifyScrollBars(Sci::Line nMax, Sci::Line nPage) override {
@@ -31,51 +35,58 @@ class SciAdapter : private ScintillaBase {
   void Paste() override {}
   void ClaimSelection() override {}
   void NotifyChange() override {}
-  void NotifyParent(SCNotification scn) override;
+  void NotifyParent(NotificationData scn) override;
   void CopyToClipboard(const SelectionText &selectedText) override {}
   void SetMouseCapture(bool on) override {}
   bool HaveMouseCapture() override {
     return false;
   }
-  sptr_t DefWndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) override {
+  sptr_t DefWndProc(Message iMessage, uptr_t wParam, sptr_t lParam) override {
     return 0;
   }
   void CreateCallTipWindow(PRectangle rc) override {}
   void AddToPopUp(const char *label, int cmd = 0, bool enabled = true) override {}
 
+  std::string UTF8FromEncoded(std::string_view encoded) const override {}
+  std::string EncodedFromUTF8(std::string_view utf8) const override {}
   /// below ade not needed to compile but are needed to link WTF
-  void NotifyModifyAttempt(Scintilla::Document *a, void *b) override {
+  void NotifyModifyAttempt(Document *a, void *b) override {
     ScintillaBase::NotifyModifyAttempt(a, b);
   }
-  void NotifySavePoint(Scintilla::Document *a, void *b, bool c) override {
+  void NotifySavePoint(Document *a, void *b, bool c) override {
     ScintillaBase::NotifySavePoint(a, b, c);
   }
-  void NotifyModified(Scintilla::Document *a, Scintilla::DocModification b,
-                      void *c) override {
+  void NotifyModified(Document *a, DocModification b, void *c) override {
     ScintillaBase::NotifyModified(a, b, c);
   }
-  void NotifyDeleted(Scintilla::Document *a, void *b) noexcept override {
+  void NotifyDeleted(Document *a, void *b) noexcept override {
     ScintillaBase::NotifyDeleted(a, b);
   }
-  void NotifyStyleNeeded(Scintilla::Document *a, void *b, long c) override {
+  void NotifyStyleNeeded(Document *a, void *b, long c) override {
     ScintillaBase::NotifyStyleNeeded(a, b, c);
   }
-  void NotifyLexerChanged(Scintilla::Document *a, void *b) override {
-    ScintillaBase::NotifyLexerChanged(a, b);
-  }
-  void NotifyErrorOccurred(Scintilla::Document *a, void *b, int c) override {
+  void NotifyErrorOccurred(Document *a, void *b, Status c) override {
     ScintillaBase::NotifyErrorOccurred(a, b, c);
   }
-  void ListNotify(Scintilla::ListBoxEvent *a) override {
+  // void NotifyLexerChanged(Document *a, void *b) override {
+  // ScintillaBase::NotifyLexerChanged(a, b);
+  // }
+  // void NotifyErrorOccurred(Document *a, void *b, int c) override {
+  // ScintillaBase::NotifyErrorOccurred(a, b, c);
+  //}
+  void ListNotify(ListBoxEvent *a) override {
     ScintillaBase::ListNotify(a);
   }
 
+  // Editor:
+
+
   // WTF 2.0
-  bool FineTickerRunning(TickReason reason) override {
-    return false;
-  }
-  void FineTickerStart(TickReason reason, int millis, int tolerance) override {}
-  void FineTickerCancel(TickReason reason) override {}
+  // bool FineTickerRunning(TickReason reason) override {
+  // return false;
+  //}
+  // void FineTickerStart(TickReason reason, int millis, int tolerance) override {}
+  // void FineTickerCancel(TickReason reason) override {}
 
 
   // THer following is written by human being (matra)
@@ -149,9 +160,9 @@ class SciAdapter : private ScintillaBase {
   std::set<int> get_changed_lines();
 
 
-  static std::map<std::string, int> extension_to_lexerId;
-  static const std::vector<const Scintilla::LexerModule *> lexers;
-  // ddebugginy help TODO remove
+  // static std::map<std::string, int> extension_to_lexerId;
+  // static const std::vector<const Scintilla::LexerModule *> lexers;
+  //  ddebugginy help TODO remove
   void nick(int a);
 
   private:
@@ -162,7 +173,7 @@ class SciAdapter : private ScintillaBase {
 
   void scroll_to_cursor();
   // given a file name, returns the lexer that should be used to colorize the file
-  [[nodiscard]] const Scintilla::LexerModule *get_lexer(const path &filename);
+  //[[nodiscard]] const Scintilla::LexerModule *get_lexer(const path &filename);
   // Similar to `selection_points` but returns pair of scintilla positions
   [[nodiscard]] std::array<int, 2> selection_range();
 

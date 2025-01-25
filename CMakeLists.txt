@@ -37,10 +37,16 @@ target_link_libraries(turbo-core PUBLIC
 # Target 'scintilla'
 
 file(GLOB_RECURSE SCINTILLA_SRC 
-    "${CMAKE_CURRENT_LIST_DIR}/source/scintilla/src/*.cxx"
-    "${CMAKE_CURRENT_LIST_DIR}/source/scintilla/lexlib/*.cxx"
-    "${CMAKE_CURRENT_LIST_DIR}/source/platform/*.cc"
-    "${CMAKE_CURRENT_LIST_DIR}/source/scintilla/lexers/*.cxx"
+    #"${CMAKE_CURRENT_LIST_DIR}/source/scintilla/src/*.cxx"
+    #"${CMAKE_CURRENT_LIST_DIR}/source/scintilla/lexlib/*.cxx"
+    #"${CMAKE_CURRENT_LIST_DIR}/source/platform/*.cc"
+    #"${CMAKE_CURRENT_LIST_DIR}/source/scintilla/lexers/*.cxx"
+
+    #"${CMAKE_CURRENT_LIST_DIR}/sci-tui/*.o"
+    "${CMAKE_CURRENT_LIST_DIR}/sci-tui/platform.cc"
+
+    "${CMAKE_CURRENT_LIST_DIR}/scintilla/src/*.cxx"
+    "${CMAKE_CURRENT_LIST_DIR}/scintilla/call/*.cxx"
 )
 
 add_library(scintilla OBJECT
@@ -48,11 +54,14 @@ add_library(scintilla OBJECT
 )
 
 target_include_directories(scintilla PRIVATE
-    "${CMAKE_CURRENT_LIST_DIR}/include/scintilla/include"
-    "${CMAKE_CURRENT_LIST_DIR}/include/scintilla/lexlib"
-    "${CMAKE_CURRENT_LIST_DIR}/include/scintilla/src"
-    "${CMAKE_CURRENT_LIST_DIR}/include/scintilla"
-    "${CMAKE_CURRENT_LIST_DIR}/source/platform/surface.h"
+    #"${CMAKE_CURRENT_LIST_DIR}/include/scintilla/include"
+    #"${CMAKE_CURRENT_LIST_DIR}/include/scintilla/lexlib"
+    #"${CMAKE_CURRENT_LIST_DIR}/include/scintilla/src"
+    #"${CMAKE_CURRENT_LIST_DIR}/include/scintilla"
+    #"${CMAKE_CURRENT_LIST_DIR}/source/platform/surface.h"
+    "${CMAKE_CURRENT_LIST_DIR}/scintilla/include"
+    "${CMAKE_CURRENT_LIST_DIR}/scintilla/src"
+    "${CMAKE_CURRENT_LIST_DIR}/sci-tui/"
 )
 target_compile_definitions(scintilla PRIVATE
     CURSES
