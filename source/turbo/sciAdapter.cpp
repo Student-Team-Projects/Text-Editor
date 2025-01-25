@@ -124,7 +124,7 @@ const Scintilla::LexerModule *SciAdapter::get_lexer(const path &filename) {
 
 void SciAdapter::set_cursor_pos(std::array<int, 2> pos, bool set_m_prefered_column) {
 
-  this->m_changed_lines.insert(get_cursor_pos()[1]);
+  // this->m_changed_lines.insert(get_cursor_pos()[1]);
 
   auto [x, y] = pos;
   // y += WndProc(SCI_GETFIRSTVISIBLELINE, 0, 0);
@@ -142,7 +142,7 @@ void SciAdapter::set_cursor_pos(std::array<int, 2> pos, bool set_m_prefered_colu
   int line_start = WndProc(SCI_POSITIONFROMLINE, y, 0);
   WndProc(SCI_SETCURRENTPOS, line_start + x, 0);
 
-  this->m_changed_lines.insert(y);
+  // this->m_changed_lines.insert(y);
 }
 
 std::array<int, 2> SciAdapter::get_cursor_pos() {
@@ -282,7 +282,7 @@ void SciAdapter::cut() {
 
 
 void SciAdapter::move_cursor_h(int direction) {
-  this->m_changed_lines.insert(get_cursor_pos()[1]);
+  // this->m_changed_lines.insert(get_cursor_pos()[1]);
   auto pos = WndProc(SCI_GETCURRENTPOS, 0, 0);
   if (this->m_selection_mode) {
     WndProc(SCI_SETCURRENTPOS, pos + direction, 0);
@@ -291,11 +291,11 @@ void SciAdapter::move_cursor_h(int direction) {
   }
   WndProc(SCI_SCROLLCARET, 0, 0);
   this->m_prefered_column = get_cursor_pos()[0];
-  this->m_changed_lines.insert(get_cursor_pos()[1]);
+  // this->m_changed_lines.insert(get_cursor_pos()[1]);
 }
 
 void SciAdapter::move_cursor_h_word(int direction) {
-  this->m_changed_lines.insert(get_cursor_pos()[1]);
+  // this->m_changed_lines.insert(get_cursor_pos()[1]);
   if (direction > 0) {
     KeyCommand(SCI_WORDRIGHT);
   } else {
@@ -306,12 +306,12 @@ void SciAdapter::move_cursor_h_word(int direction) {
     WndProc(SCI_SETSEL, -1, pos);
   }
   this->m_prefered_column = get_cursor_pos()[0];
-  this->m_changed_lines.insert(get_cursor_pos()[1]);
+  // this->m_changed_lines.insert(get_cursor_pos()[1]);
 }
 
 void SciAdapter::move_cursor_v(int direction) {
   auto [_, y] = get_cursor_pos();
-  this->m_changed_lines.insert(y);
+  // this->m_changed_lines.insert(y);
 
   int line_count = WndProc(SCI_GETLINECOUNT, 0, 0);
 
@@ -321,11 +321,14 @@ void SciAdapter::move_cursor_v(int direction) {
   int x = min(this->m_prefered_column, line_width - 1);
   set_cursor_pos({x, y}, 0);
 
+  // KeyCommand(SCI_LINEDOWN);
+
+
   if (this->m_selection_mode == 0) {
     int pos = WndProc(SCI_GETCURRENTPOS, 0, 0);
     WndProc(SCI_SETSEL, -1, pos);
   }
-  this->m_changed_lines.insert(y);
+  // this->m_changed_lines.insert(y);
 }
 
 void SciAdapter::colorize() {
@@ -377,9 +380,9 @@ int SciAdapter::toggle_selection_mode() {
 
   if (this->m_selection_mode == 0) {
     auto [pos_start, pos_end] = selection_points();
-    for (int i = pos_start[1]; i <= pos_end[1]; i++) {
-      this->m_changed_lines.insert(i);
-    }
+    // for (int i = pos_start[1]; i <= pos_end[1]; i++) {
+    // this->m_changed_lines.insert(i);
+    // }
     int pos = WndProc(SCI_GETCURRENTPOS, 0, 0);
     WndProc(SCI_SETSEL, -1, pos);
   }
@@ -389,9 +392,9 @@ void SciAdapter::set_selection_mode(int mode) {
   this->m_selection_mode = mode;
   if (this->m_selection_mode == 0) {
     auto [pos_start, pos_end] = selection_points();
-    for (int i = pos_start[1]; i <= pos_end[1]; i++) {
-      this->m_changed_lines.insert(i);
-    }
+    // for (int i = pos_start[1]; i <= pos_end[1]; i++) {
+    // this->m_changed_lines.insert(i);
+    // }
     int pos = WndProc(SCI_GETCURRENTPOS, 0, 0);
     WndProc(SCI_SETSEL, -1, pos);
   }
@@ -422,24 +425,29 @@ void SciAdapter::NotifyParent(SCNotification scn) {
       WndProc(SCI_COLOURISE, pos_start, pos_end);
     }
 
-    for (int i = line_start; i <= line_end; i++) {
-      m_changed_lines.insert(i);
-    }
-    if (scn.linesAdded != -0) {
-      // TODO remove 100
-      for (int i = line_end; i <= line_end + 100; i++) {
-        m_changed_lines.insert(i);
-      }
-    }
+    // for (int i = line_start; i <= line_end; i++) {
+    // m_changed_lines.insert(i);
+    //}
+    // if (scn.linesAdded != -0) {
+    //// TODO remove 100
+    // for (int i = line_end; i <= line_end + 100; i++) {
+    // m_changed_lines.insert(i);
+    //}
+    //}
   }
 }
 
 std::set<int> SciAdapter::get_changed_lines() {
-  auto res = m_changed_lines;
-  m_changed_lines.clear();
-  return res;
+  // auto res = m_changed_lines;
+  // m_changed_lines.clear();
+  // return res;
+  assert(false);
 }
 
+
+void SciAdapter::nick(int a) {
+  KeyCommand(a);
+}
 
 // void SciAdapter::new_file() {
 // auto text = "Garter, if you're gonna act like a baby,\n you might as well crawl back up

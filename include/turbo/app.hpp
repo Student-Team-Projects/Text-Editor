@@ -23,6 +23,7 @@
 const int greet_them_cmd = 100;
 const int cm_toggle_tree = 101;
 const int open_file_in_editor = 102;
+const int open_new_file_in_editor = 103;
 
 class t_hello_app : public TApplication {
   public:

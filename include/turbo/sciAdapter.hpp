@@ -151,7 +151,8 @@ class SciAdapter : private ScintillaBase {
 
   static std::map<std::string, int> extension_to_lexerId;
   static const std::vector<const Scintilla::LexerModule *> lexers;
-
+  // ddebugginy help TODO remove
+  void nick(int a);
 
   private:
   // Removes the selected text and exits the selection mode
@@ -172,7 +173,7 @@ class SciAdapter : private ScintillaBase {
 
   // Keeps track of lines that need to be redrawn
   // unused
-  std::set<int> m_changed_lines;
+  // std::set<int> m_changed_lines;
 };
 } // namespace Scintilla
 

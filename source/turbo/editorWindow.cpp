@@ -1,3 +1,5 @@
+#include "debug.hpp"
+#include "turbo/clockView.hpp"
 #include <cassert>
 #include <cstring>
 #include <iostream>
@@ -94,9 +96,15 @@ void editorView::handleEvent(TEvent &event) {
     case kbCtrlRight:
       m_adapter->move_cursor_h_word(1);
       break;
+      // case kbL:
+      //  m_adapter->set_selection_mode(1);
+      //  m_adapter->move_cursor_h(-1);
+      //  break;
     case kbCtrlM:
       m_adapter->toggle_selection_mode();
       break;
+    case kbTab:
+      m_adapter->nick(SCI_TAB);
     default:
       handled = false;
 
@@ -106,6 +114,7 @@ void editorView::handleEvent(TEvent &event) {
       for (auto ch : event.keyDown.getText()) {
         if (isprint(ch)) m_adapter->insert_char(ch);
       }
+      debug("unhandled key: ", event.keyDown.keyCode);
       break;
     }
     if (handled) {

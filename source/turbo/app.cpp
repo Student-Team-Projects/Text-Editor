@@ -56,25 +56,33 @@ auto t_hello_app::handleEvent(TEvent &event) -> void {
   TApplication::handleEvent(event);
   if (event.what == evCommand) {
     switch (event.message.command) {
+
     case greet_them_cmd:
       greeting_box();
       clearEvent(event);
       break;
+
     case cm_toggle_tree:
       m_explorer->toggle_tree();
       clearEvent(event);
       break;
-    default:
-      break;
-    case open_file_in_editor:
+
+    case open_file_in_editor: {
       auto file = m_explorer->get_selesced_path();
       if (file.back() == '/') {
         file.pop_back();
       }
       std::filesystem::path path(file);
-      // std::cout << "open_file_in_editor: " << file << std::endl;
       m_editor = new editorWindow(deskTop->getExtent(), path);
       deskTop->insert(m_editor);
+    } break;
+
+    case open_new_file_in_editor: {
+      m_editor = new editorWindow(deskTop->getExtent(), "");
+      deskTop->insert(m_editor);
+    } break;
+
+    default:
       break;
     }
   }
@@ -88,6 +96,7 @@ auto t_hello_app::initMenuBar(TRect rect) -> TMenuBar * {
                 *new TMenuItem("~T~oggle tree", cm_toggle_tree, kbF9, hcNoContext, "F9") +
                 *new TMenuItem("Open in editor", open_file_in_editor, 0, hcNoContext,
                                "~nicolas cage~") +
+                *new TMenuItem("New file", open_new_file_in_editor, 0, hcNoContext, "") +
                 *new TMenuItem("E~x~it", cmQuit, cmQuit, hcNoContext, "Alt-X"));
 }
 
