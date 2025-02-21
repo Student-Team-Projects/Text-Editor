@@ -53,11 +53,14 @@ class t_hello_app : public TApplication {
   auto fileNew() -> void;
   auto chdir() -> void;
 
-  auto createFindDialog() -> TDialog *;
-  auto createReplaceDialog() -> TDialog *;
+  static auto createFindDialog() -> TDialog *;
+  static auto createReplaceDialog() -> TDialog *;
 
   private:
   static void greeting_box();
   t_clock_view *m_clock;
   t_explorer_window *m_explorer;
+  tc_file_watcher m_editor_watcher;
 };
+
+auto mujDialog(int dialog, ...) -> ushort;
