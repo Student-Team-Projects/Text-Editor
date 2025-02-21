@@ -13,6 +13,7 @@ class t_explorer_outline : public TOutline {
                      const std::string &path);
   auto adjust(TNode *node, bool expand) -> void override;
   auto selected(int idx) -> void override;
+  auto change_dir(const std::string &path) -> void;
 
   private:
   auto get_watcher(TNode *node)
