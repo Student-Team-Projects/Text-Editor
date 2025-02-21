@@ -1,7 +1,6 @@
 #include <algorithm>
 #include <cassert>
 #include <cstring>
-#include <debug.hpp>
 #include <efsw/efsw.hpp>
 #include <filesystem>
 #include <functional>
@@ -41,13 +40,11 @@ auto t_explorer_outline::selected(int idx) -> void {
 auto t_explorer_outline::set_watcher(TNode *node) -> void {
   assert(not m_watch_ids.contains(node));
   m_watch_ids[node] = m_watcher.add_watcher(node_to_path(node), get_watcher(node));
-  debug("set_watcher", node->text, m_watch_ids[node]);
 }
 auto t_explorer_outline::erase_watcher(TNode *node) -> void {
   assert(m_watch_ids.contains(node));
   m_watcher.remove_watcher(m_watch_ids[node]);
   m_watch_ids.erase(node);
-  debug("erase_watcher", node->text);
 }
 auto t_explorer_outline::get_watcher(TNode *node)
     -> std::function<void(efsw::WatchID, const std::string &, const std::string &,
@@ -55,7 +52,6 @@ auto t_explorer_outline::get_watcher(TNode *node)
   return [this, node](efsw::WatchID watch_id, const std::string &dir,
                       const std::string &filename, efsw::Action action,
                       const std::string &old_filename) {
-    debug("watcher", watch_id, dir, node->text, filename, action, old_filename);
     switch (action) {
     case efsw::Actions::Add:
       file_add(node, filename);
@@ -134,7 +130,6 @@ auto t_explorer_outline::erase_node(TNode *node, const std::string &filename) ->
   return erase_node;
 }
 auto t_explorer_outline::file_add(TNode *node, const std::string &filename) -> void {
-  debug("+", node->text, filename);
   auto *new_node = new TNode(filename);
   new_node->expanded = false;
   if (std::filesystem::is_directory(node_to_path(node) + filename)) {
@@ -144,7 +139,6 @@ auto t_explorer_outline::file_add(TNode *node, const std::string &filename) -> v
   insert_node(node, new_node);
 }
 auto t_explorer_outline::file_delete(TNode *node, const std::string &filename) -> void {
-  debug("-", node->text, filename);
   auto *erased_node = erase_node(node, filename);
   if (erased_node == nullptr) { // can happen due to weird behaviour of moving
     return;
