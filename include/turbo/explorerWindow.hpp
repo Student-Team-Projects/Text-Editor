@@ -42,6 +42,7 @@ class t_explorer_window : public TWindow {
   t_explorer_window(const TRect &bounds, const std::string &path);
   auto close() -> void override;
   auto toggle_tree() -> void;
+  auto visible() -> bool;
 
   private:
   t_explorer_outline *m_outline;

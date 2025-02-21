@@ -188,6 +188,7 @@ t_explorer_window::t_explorer_window(const TRect &bounds, const std::string &pat
 auto t_explorer_window::close() -> void {
   message(t_hello_app::app, evCommand, cm_toggle_tree, nullptr);
 }
+auto t_explorer_window::visible() -> bool { return m_tree_visible; }
 auto t_explorer_window::toggle_tree() -> void {
   m_tree_visible = !m_tree_visible;
   if (m_tree_visible) {

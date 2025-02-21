@@ -12,12 +12,19 @@
 #define Uses_TApplication
 #define Uses_TEditWindow
 #define Uses_TDeskTop
+#define Uses_TFileDialog
+#define Uses_THistory
+#define Uses_TInputLine
+#define Uses_TLabel
+#define Uses_TCheckBoxes
+#define Uses_TSItem
 #define Uses_TRect
 #define Uses_TEditor
 #define Uses_TFileEditor
 #define Uses_TFileDialog
 #define Uses_TChDirDialog
 #define Uses_TMenuItem
+#define Uses_MsgBox
 #define Uses_TStatusLine
 #define Uses_TStatusItem
 #define Uses_TStatusDef
@@ -27,14 +34,12 @@
 #include <turbo/explorerWindow.hpp>
 #include <tvision/tv.h>
 
-const int cm_open = 100;
-const int cm_new = 101;
 const int cm_chdir = 102;
 const int cm_toggle_tree = 103;
 
 class t_hello_app : public TApplication {
   public:
-  t_hello_app();
+  t_hello_app(int argc, char **argv);
   static t_hello_app *app;
 
   auto handleEvent(TEvent &event) -> void override;
@@ -42,9 +47,14 @@ class t_hello_app : public TApplication {
   static auto initMenuBar(TRect rect) -> TMenuBar *;
   static auto initStatusLine(TRect rect) -> TStatusLine *;
 
+  auto newEditor(std::optional<char *> path) -> void;
+
   auto fileOpen() -> void;
   auto fileNew() -> void;
   auto chdir() -> void;
+
+  auto createFindDialog() -> TDialog *;
+  auto createReplaceDialog() -> TDialog *;
 
   private:
   static void greeting_box();
