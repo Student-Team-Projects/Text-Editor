@@ -33,6 +33,7 @@
 #include <turbo/clockView.hpp>
 #include <turbo/explorerWindow.hpp>
 #include <tvision/tv.h>
+#include <optional>
 
 const int cm_chdir = 102;
 const int cm_toggle_tree = 103;
