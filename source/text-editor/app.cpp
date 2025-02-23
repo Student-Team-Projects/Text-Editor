@@ -180,6 +180,7 @@ auto App::createHelpDialog() -> TDialog * {
 
 auto App::newEditor(std::optional<char *> path) -> void {
   auto rect = deskTop->getExtent();
+  rect.b.y -= 12;
   rect.a.x += (m_explorer->visible() ? m_explorer->size.x : 0);
   auto *editor = new EditWindow(rect, path.value_or(nullptr), wnNoNumber);
   deskTop->insert(editor);
