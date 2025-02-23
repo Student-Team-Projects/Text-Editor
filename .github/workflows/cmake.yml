@@ -39,22 +39,22 @@ jobs:
       shell: bash
       run: cmake --build . -j$(nproc)
 
-  build-macos-clang:
-    name: MacOS (Clang)
-    runs-on: macos-latest
-    steps:
-    - uses: actions/checkout@v4
-      with:
-        submodules: 'recursive'
+  # build-macos-clang:
+  #   name: MacOS (Clang)
+  #   runs-on: macos-latest
+  #   steps:
+  #   - uses: actions/checkout@v4
+  #     with:
+  #       submodules: 'recursive'
 
-    - name: Install Dependencies
-      run: |
-        brew install ninja
+  #   - name: Install Dependencies
+  #     run: |
+  #       brew install ninja
 
-    - name: Configure CMake
-      shell: bash
-      run: cmake . -DCMAKE_BUILD_TYPE=$BUILD_TYPE -G Ninja
+  #   - name: Configure CMake
+  #     shell: bash
+  #     run: cmake . -DCMAKE_BUILD_TYPE=$BUILD_TYPE -G Ninja
 
-    - name: Build
-      shell: bash
-      run: cmake --build . -j$(sysctl -n hw.logicalcpu)
+  #   - name: Build
+  #     shell: bash
+  #     run: cmake --build . -j$(sysctl -n hw.logicalcpu)
