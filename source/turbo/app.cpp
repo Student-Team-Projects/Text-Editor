@@ -2,143 +2,15 @@
 #include <debug.hpp>
 #include <filesystem>
 #include <optional>
-#include <strstream>
 #include <turbo/app.hpp>
 #include <turbo/clockView.hpp>
+#include <turbo/dialogs.hpp>
+#include <turbo/editorWindow.hpp>
 #include <turbo/explorerWindow.hpp>
 #include <tvision/tv.h>
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <time.h>
-
-time_t getFileCreationTime(char *path) {
-  struct stat attr;
-  stat(path, &attr);
-  return attr.st_mtime;
-}
-
-struct EditWindow : TEditWindow {
-
-  time_t open_time;
-
-  EditWindow(const TRect &rect, TStringView view, int val) noexcept
-      : TWindowInit(&TEditWindow::initFrame), TEditWindow(rect, view, val) {
-
-    this->open_time = time(0);
-  }
-
-  void handleEvent(TEvent &event) override {
-
-    auto p = editor->fileName;
-
-    if (event.what == evCommand) {
-
-      switch (event.message.command) {
-      case cmSave:
-        if (getFileCreationTime(p) > open_time) {
-          auto result = mujDialog(edSaveModify, p);
-          if (result == cmYes) {
-            TEditWindow::handleEvent(event);
-            this->open_time = getFileCreationTime(p);
-          }
-          // debug("dialog:", dialog);
-          // debug("unsafe save");
-        } else {
-          TEditWindow::handleEvent(event);
-          this->open_time = getFileCreationTime(p);
-        }
-        // debug("cmSave");
-        clearEvent(event);
-        return;
-      }
-    }
-    TEditWindow::handleEvent(event);
-  }
-};
-
-ushort execDialog(TDialog *d, void *data) {
-  TView *p = TProgram::application->validView(d);
-  if (p == 0)
-    return cmCancel;
-  else {
-    if (data != 0) p->setData(data);
-    ushort result = TProgram::deskTop->execView(p);
-    if (result != cmCancel && data != 0) p->getData(data);
-    TObject::destroy(p);
-    return result;
-  }
-}
-
-auto mujDialog(int dialog, ...) -> ushort {
-  va_list arg;
-  char buf[256] = {0};
-  std::ostrstream os(buf, sizeof(buf) - 1);
-
-  switch (dialog) {
-  case edOutOfMemory:
-    return messageBox("Not enough memory for this operation", mfError | mfOKButton);
-  case edReadError: {
-    va_start(arg, dialog);
-    os << "Error reading file " << va_arg(arg, char *) << "." << std::ends;
-    va_end(arg);
-    return messageBox(buf, mfError | mfOKButton);
-  }
-  case edWriteError: {
-    va_start(arg, dialog);
-    os << "Error writing file " << va_arg(arg, char *) << "." << std::ends;
-    va_end(arg);
-    return messageBox(buf, mfError | mfOKButton);
-  }
-  case edCreateError: {
-    va_start(arg, dialog);
-    os << "Error creating file " << va_arg(arg, char *) << "." << std::ends;
-    va_end(arg);
-    return messageBox(buf, mfError | mfOKButton);
-  }
-  case edSaveModify: {
-    va_start(arg, dialog);
-    os << va_arg(arg, char *) << " has been modified. Save?" << std::ends;
-    va_end(arg);
-    return messageBox(buf, mfInformation | mfYesNoCancel);
-  }
-  case edSaveUntitled:
-    return messageBox("Save untitled file?", mfInformation | mfYesNoCancel);
-  case edSaveAs: {
-    va_start(arg, dialog);
-    return execDialog(new TFileDialog("*.*", "Save file as", "~N~ame", fdOKButton, 101),
-                      va_arg(arg, char *));
-  }
-  case edFind: {
-    va_start(arg, dialog);
-    return execDialog(t_hello_app::createFindDialog(), va_arg(arg, char *));
-  }
-  case edSearchFailed:
-    return messageBox("Search string not found.", mfError | mfOKButton);
-  case edReplace: {
-    va_start(arg, dialog);
-    return execDialog(t_hello_app::createReplaceDialog(), va_arg(arg, char *));
-  }
-  case edReplacePrompt:
-    //  Avoid placing the dialog on the same line as the cursor
-    TRect r(0, 1, 40, 8);
-    r.move((TProgram::deskTop->size.x - r.b.x) / 2, 0);
-    auto t = TProgram::deskTop->makeGlobal(r.b);
-    t.y++;
-    va_start(arg, dialog);
-    auto *pt = va_arg(arg, TPoint *);
-    if (pt->y <= t.y) r.move(0, TProgram::deskTop->size.y - r.b.y - 2);
-    va_end(arg);
-    return messageBoxRect(r, "Replace this occurence?", mfYesNoCancel | mfInformation);
-  }
-  return cmCancel;
-}
-
-t_hello_app::t_hello_app(int argc, char **argv)
-    : TProgInit(&t_hello_app::initStatusLine, &t_hello_app::initMenuBar,
-                &t_hello_app::initDeskTop) {
+App::App(int argc, char **argv)
+    : TProgInit(&App::initStatusLine, &App::initMenuBar, &App::initDeskTop) {
   {
     TRect rect = getExtent();
     rect.a.x = rect.b.x - t_clock_view::time_size;
@@ -150,7 +22,7 @@ t_hello_app::t_hello_app(int argc, char **argv)
   {
     TRect rect = deskTop->getExtent();
     if (rect.b.x > 22) {
-      rect.a.x = rect.b.x - std::min(std::max(rect.b.x - 82, 22), 30);
+      rect.a.x = rect.b.x - std::clamp(rect.b.x - 82, 22, 30);
       rect.b.x = rect.b.x - rect.a.x;
       rect.a.x = 0;
     }
@@ -180,7 +52,9 @@ t_hello_app::t_hello_app(int argc, char **argv)
     disableCommands(ts);
     cascade();
   }
-  { TEditor::editorDialog = mujDialog; }
+  {
+    TEditor::editorDialog = dialogs::spawnDialog;
+  }
   {
     while (--argc) {
       newEditor(std::optional<char *>(*++argv));
@@ -188,7 +62,7 @@ t_hello_app::t_hello_app(int argc, char **argv)
   }
 }
 
-auto t_hello_app::createFindDialog() -> TDialog * {
+auto App::createFindDialog() -> TDialog * {
   auto *d = new TDialog(TRect(0, 0, 38, 12), "Find");
 
   d->options |= ofCentered;
@@ -209,7 +83,7 @@ auto t_hello_app::createFindDialog() -> TDialog * {
   return d;
 }
 
-auto t_hello_app::createReplaceDialog() -> TDialog * {
+auto App::createReplaceDialog() -> TDialog * {
   auto *d = new TDialog(TRect(0, 0, 40, 16), "Replace");
 
   d->options |= ofCentered;
@@ -239,7 +113,7 @@ auto t_hello_app::createReplaceDialog() -> TDialog * {
   return d;
 }
 
-auto t_hello_app::createHelpDialog() -> TDialog * {
+auto App::createHelpDialog() -> TDialog * {
   auto *d = new TDialog(TRect(0, 0, 80, 32), "Help");
   d->options |= ofCentered;
 
@@ -295,14 +169,14 @@ auto t_hello_app::createHelpDialog() -> TDialog * {
   return d;
 }
 
-auto t_hello_app::newEditor(std::optional<char *> path) -> void {
+auto App::newEditor(std::optional<char *> path) -> void {
   auto rect = deskTop->getExtent();
   rect.a.x += (m_explorer->visible() ? m_explorer->size.x : 0);
   auto *editor = new EditWindow(rect, path.value_or(nullptr), wnNoNumber);
   deskTop->insert(editor);
 }
 
-auto t_hello_app::fileOpen() -> void {
+auto App::fileOpen() -> void {
   char fileName[MAXPATH];
   strcpy(fileName, "*.*");
   auto *dialog = new TFileDialog("*.*", "Open file", "~N~ame", fdOpenButton, 100);
@@ -317,9 +191,9 @@ auto t_hello_app::fileOpen() -> void {
   newEditor(&fileName[0]);
 }
 
-auto t_hello_app::fileNew() -> void { newEditor(std::nullopt); }
+auto App::fileNew() -> void { newEditor(std::nullopt); }
 
-auto t_hello_app::chdir() -> void {
+auto App::chdir() -> void {
   auto *dialog = new TChDirDialog(cdNormal, 0);
   if (deskTop->execView(dialog) != cmCancel) {
     auto current_path = std::filesystem::current_path().string() + '/';
@@ -336,7 +210,7 @@ auto t_hello_app::chdir() -> void {
   }
 }
 
-auto t_hello_app::handleEvent(TEvent &event) -> void {
+auto App::handleEvent(TEvent &event) -> void {
   TApplication::handleEvent(event);
   if (event.what == evCommand) {
     switch (event.message.command) {
@@ -348,11 +222,6 @@ auto t_hello_app::handleEvent(TEvent &event) -> void {
       fileNew();
       clearEvent(event);
       break;
-      // case cmSave:
-      // fileNew();
-      // clearEvent(event);
-      // break;
-
     case cm_chdir:
       chdir();
       clearEvent(event);
@@ -374,7 +243,7 @@ auto t_hello_app::handleEvent(TEvent &event) -> void {
   }
 }
 
-auto t_hello_app::initMenuBar(TRect rect) -> TMenuBar * {
+auto App::initMenuBar(TRect rect) -> TMenuBar * {
   TSubMenu &sub1 = *new TSubMenu("~F~ile", kbAltF) +
                    *new TMenuItem("~O~pen", cmOpen, kbF3, hcNoContext, "F3") +
                    *new TMenuItem("~N~ew", cmNew, kbCtrlN, hcNoContext, "Ctrl-N") +
@@ -414,7 +283,7 @@ auto t_hello_app::initMenuBar(TRect rect) -> TMenuBar * {
   return new TMenuBar(rect, sub1 + sub2 + sub3 + sub4 + sub5);
 }
 
-auto t_hello_app::initStatusLine(TRect rect) -> TStatusLine * {
+auto App::initStatusLine(TRect rect) -> TStatusLine * {
   rect.a.y = rect.b.y - 1;
   return new TStatusLine(
       rect, *new TStatusDef(0, 0xFFFF) + *new TStatusItem(0, kbAltX, cmQuit) +
@@ -431,18 +300,18 @@ auto t_hello_app::initStatusLine(TRect rect) -> TStatusLine * {
                 *new TStatusItem(0, kbCtrlF5, cmResize));
 }
 
-auto t_hello_app::idle() -> void {
+auto App::idle() -> void {
   TApplication::idle();
   if (m_clock != nullptr) {
     m_clock->update();
   }
 }
 
-t_hello_app *t_hello_app::app = nullptr;
+App *App::app = nullptr;
 auto main(int argc, char **argv) -> int {
-  t_hello_app hello_world(argc, argv);
-  t_hello_app::app = &hello_world;
+  App hello_world(argc, argv);
+  App::app = &hello_world;
   hello_world.run();
-  t_hello_app::app = nullptr;
+  App::app = nullptr;
   return 0;
 }

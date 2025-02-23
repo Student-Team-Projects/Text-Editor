@@ -35,37 +35,41 @@
 #include <turbo/explorerWindow.hpp>
 #include <tvision/tv.h>
 
-const int cm_chdir = 102;
-const int cm_toggle_tree = 103;
-const int cm_open_guy = 104;
-const int open_help = 105;
+constexpr const int cm_chdir = 102;
+constexpr const int cm_toggle_tree = 103;
+constexpr const int cm_open_guy = 104;
+constexpr const int open_help = 105;
 
-class t_hello_app : public TApplication {
+// Represents the whole thing
+class App : public TApplication {
   public:
-  t_hello_app(int argc, char **argv);
-  static t_hello_app *app;
+  App(int argc, char **argv);
+  static App *app;
 
   auto handleEvent(TEvent &event) -> void override;
   auto idle() -> void override;
   static auto initMenuBar(TRect rect) -> TMenuBar *;
   static auto initStatusLine(TRect rect) -> TStatusLine *;
 
-  static auto createHelpDialog() -> TDialog *;
-
+  // Spawns widow that allows editing of a file. if `path` is enpty, opens new file
+  // othrewise opens file at `path`
   auto newEditor(std::optional<char *> path) -> void;
 
+  // Open a popup dialog to open a existing file
   auto fileOpen() -> void;
+  // Open a empty file
   auto fileNew() -> void;
+  // Changes the root of the file explorer
   auto chdir() -> void;
 
+  // Self explanatory
+  static auto createHelpDialog() -> TDialog *;
   static auto createFindDialog() -> TDialog *;
   static auto createReplaceDialog() -> TDialog *;
 
   private:
-  static void greeting_box();
   t_clock_view *m_clock;
   t_explorer_window *m_explorer;
   tc_file_watcher m_editor_watcher;
 };
 
-auto mujDialog(int dialog, ...) -> ushort;
