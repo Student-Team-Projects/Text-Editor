@@ -26,7 +26,7 @@ jobs:
           deb http://us.archive.ubuntu.com/ubuntu/ bionic universe
         EOF
         sudo apt -y update
-        sudo apt -y install libncursesw5-dev g++-10 libgtest-dev ninja-build libvterm-dev
+        sudo apt -y install libncursesw5-dev g++-10 ninja-build
 
     - name: Configure CMake
       shell: bash
