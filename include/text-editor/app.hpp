@@ -47,6 +47,7 @@ constexpr const int cm_chdir = 102;
 constexpr const int cm_toggle_tree = 103;
 constexpr const int cm_open_guy = 104;
 constexpr const int open_help = 105;
+constexpr const int cm_open_term = 106;
 
 // Represents the whole thing
 class App : public TApplication {

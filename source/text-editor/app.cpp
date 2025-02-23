@@ -6,6 +6,7 @@
 //
 // Licensed under the MIT license
 
+#include "text-editor/terminal.hpp"
 #include <algorithm>
 #include <debug.hpp>
 #include <filesystem>
@@ -243,10 +244,15 @@ auto App::handleEvent(TEvent &event) -> void {
       clearEvent(event);
       break;
     case open_help:
-      auto *dialog = createHelpDialog();
-      deskTop->execView(dialog);
+      deskTop->execView(createHelpDialog());
       clearEvent(event);
       break;
+    case cm_open_term:
+      auto *term = new t_terminal(
+default_bounds(deskTop->getExtent()));
+      if(term) {
+        deskTop->insert(term);
+      }
     }
   }
 }
@@ -287,8 +293,11 @@ auto App::initMenuBar(TRect rect) -> TMenuBar * {
   TSubMenu &sub5 = *new TSubMenu("~H~elp", kbAltH) +
                    *new TMenuItem("~H~elp", open_help, kbF1, hcNoContext, "F1");
 
+  TSubMenu &sub6 = *new TSubMenu("~T~erminal", kbAltT) +
+                   *new TMenuItem("~N~ew", cm_open_term, kbCtrlT, hcNoContext, "Ctrl+T");
+
   rect.b.y = rect.a.y + 1;
-  return new TMenuBar(rect, sub1 + sub2 + sub3 + sub4 + sub5);
+  return new TMenuBar(rect, sub1 + sub2 + sub3 + sub4 + sub5 + sub6);
 }
 
 auto App::initStatusLine(TRect rect) -> TStatusLine * {
@@ -313,6 +322,7 @@ auto App::idle() -> void {
   if (m_clock != nullptr) {
     m_clock->update();
   }
+  term_idle(this);
 }
 
 App *App::app = nullptr;

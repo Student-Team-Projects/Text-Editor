@@ -4,3 +4,8 @@ add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/tvision" EXCLUDE_FROM_ALL)
 
 set(BUILD_SHARED_LIBS OFF)
 add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/efsw" EXCLUDE_FROM_ALL)
+
+set(TVTERM_USE_SYSTEM_TVISION OFF CACHE BOOL "use project tvision" FORCE)
+set(TVTERM_USE_SYSTEM_LIBVTERM OFF CACHE BOOL "use -||-  libvterm" FORCE)
+add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/tvterm" EXCLUDE_FROM_ALL)
+
