@@ -1,6 +1,14 @@
+
+// Copyright (c) 2025 Piotr Białek
+// Copyright (c) 2025 Mateusz Rajs
+// Copyright (c) 2025 Mikołaj Rams
+// Copyright (c) 2025 Antoni Długosz
+//
+// Licensed under the MIT license
+
 #include <efsw/efsw.hpp>
 #include <string>
-#include <turbo-core/fileWatcher.hpp>
+#include <text-editor-core/fileWatcher.hpp>
 
 tc_file_watcher::tc_file_watcher() : m_watcher(new efsw::FileWatcher()) {
   m_watcher->watch();

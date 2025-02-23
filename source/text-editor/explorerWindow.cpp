@@ -1,20 +1,28 @@
+
+// Copyright (c) 2025 Piotr Białek
+// Copyright (c) 2025 Mateusz Rajs
+// Copyright (c) 2025 Mikołaj Rams
+// Copyright (c) 2025 Antoni Długosz
+//
+// Licensed under the MIT license
+
 #include <algorithm>
 #include <cassert>
 #include <cstring>
-#include <debug.hpp>
 #include <efsw/efsw.hpp>
 #include <filesystem>
 #include <functional>
 #include <string>
-#include <turbo/app.hpp>
-#include <turbo/explorerWindow.hpp>
+#include <text-editor/app.hpp>
+#include <text-editor/explorerWindow.hpp>
 #include <tvision/tv.h>
 #include <tvision/util.h>
 #include <vector>
 
 t_explorer_outline::t_explorer_outline(const TRect &bounds, TScrollBar *hsb,
-                                       TScrollBar *vsb, const std::string &path)
-    : TOutline(bounds, hsb, vsb, nullptr), m_root_path(path) {
+                                       TScrollBar *vsb, const std::string &path,
+                                       const std::function<void(std::string)> &on_open)
+    : TOutline(bounds, hsb, vsb, nullptr), m_root_path(path), m_on_open(on_open) {
   root = new TNode(path);
   populate_directory(root);
   root->expanded = true;
@@ -37,17 +45,18 @@ auto t_explorer_outline::selected(int idx) -> void {
   TOutline::selected(idx);
   auto *node = get_focused();
   adjust(node, not node->expanded);
+  if (node->childList == nullptr) {
+    m_on_open(node_to_path(node).substr(0, node_to_path(node).size() - 1));
+  }
 }
 auto t_explorer_outline::set_watcher(TNode *node) -> void {
   assert(not m_watch_ids.contains(node));
   m_watch_ids[node] = m_watcher.add_watcher(node_to_path(node), get_watcher(node));
-  debug("set_watcher", node->text, m_watch_ids[node]);
 }
 auto t_explorer_outline::erase_watcher(TNode *node) -> void {
   assert(m_watch_ids.contains(node));
   m_watcher.remove_watcher(m_watch_ids[node]);
   m_watch_ids.erase(node);
-  debug("erase_watcher", node->text);
 }
 auto t_explorer_outline::get_watcher(TNode *node)
     -> std::function<void(efsw::WatchID, const std::string &, const std::string &,
@@ -55,7 +64,6 @@ auto t_explorer_outline::get_watcher(TNode *node)
   return [this, node](efsw::WatchID watch_id, const std::string &dir,
                       const std::string &filename, efsw::Action action,
                       const std::string &old_filename) {
-    debug("watcher", watch_id, dir, node->text, filename, action, old_filename);
     switch (action) {
     case efsw::Actions::Add:
       file_add(node, filename);
@@ -134,7 +142,6 @@ auto t_explorer_outline::erase_node(TNode *node, const std::string &filename) ->
   return erase_node;
 }
 auto t_explorer_outline::file_add(TNode *node, const std::string &filename) -> void {
-  debug("+", node->text, filename);
   auto *new_node = new TNode(filename);
   new_node->expanded = false;
   if (std::filesystem::is_directory(node_to_path(node) + filename)) {
@@ -144,7 +151,6 @@ auto t_explorer_outline::file_add(TNode *node, const std::string &filename) -> v
   insert_node(node, new_node);
 }
 auto t_explorer_outline::file_delete(TNode *node, const std::string &filename) -> void {
-  debug("-", node->text, filename);
   auto *erased_node = erase_node(node, filename);
   if (erased_node == nullptr) { // can happen due to weird behaviour of moving
     return;
@@ -182,12 +188,15 @@ t_explorer_window::t_explorer_window(const TRect &bounds, const std::string &pat
     : TWindowInit(&t_explorer_window::initFrame), TWindow(bounds, "Explorer", wnNoNumber) {
   auto *hsb = standardScrollBar(sbHorizontal);
   auto *vsb = standardScrollBar(sbVertical);
-  m_outline = new t_explorer_outline(getExtent().grow(-1, -1), hsb, vsb, path);
+  m_outline = new t_explorer_outline(
+      getExtent().grow(-1, -1), hsb, vsb, path,
+      [this](std::string path) { message(App::app, evCommand, cm_open_guy, &path); });
   insert(m_outline);
 }
 auto t_explorer_window::close() -> void {
-  message(t_hello_app::app, evCommand, cm_toggle_tree, nullptr);
+  message(App::app, evCommand, cm_toggle_tree, nullptr);
 }
+auto t_explorer_window::visible() -> bool { return m_tree_visible; }
 auto t_explorer_window::toggle_tree() -> void {
   m_tree_visible = !m_tree_visible;
   if (m_tree_visible) {

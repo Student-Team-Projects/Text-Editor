@@ -1,18 +1,29 @@
+
+// Copyright (c) 2025 Piotr Białek
+// Copyright (c) 2025 Mateusz Rajs
+// Copyright (c) 2025 Mikołaj Rams
+// Copyright (c) 2025 Antoni Długosz
+//
+// Licensed under the MIT license
+
 #pragma once
 
 #define Uses_TApplication
 #define Uses_TOutline
 #define Uses_TWindow
+#include <functional>
 #include <map>
-#include <turbo-core/fileWatcher.hpp>
+#include <text-editor-core/fileWatcher.hpp>
 #include <tvision/tv.h>
 
 class t_explorer_outline : public TOutline {
   public:
   t_explorer_outline(const TRect &bounds, TScrollBar *hsb, TScrollBar *vsb,
-                     const std::string &path);
+                     const std::string &path,
+                     const std::function<void(std::string)> &on_open);
   auto adjust(TNode *node, bool expand) -> void override;
   auto selected(int idx) -> void override;
+  auto change_dir(const std::string &path) -> void;
 
   private:
   auto get_watcher(TNode *node)
@@ -34,6 +45,7 @@ class t_explorer_outline : public TOutline {
   std::map<TNode *, efsw::WatchID> m_watch_ids;
   std::string m_root_path;
   tc_file_watcher m_watcher;
+  std::function<void(std::string)> m_on_open;
 };
 
 class t_explorer_window : public TWindow {
@@ -41,6 +53,7 @@ class t_explorer_window : public TWindow {
   t_explorer_window(const TRect &bounds, const std::string &path);
   auto close() -> void override;
   auto toggle_tree() -> void;
+  auto visible() -> bool;
 
   private:
   t_explorer_outline *m_outline;

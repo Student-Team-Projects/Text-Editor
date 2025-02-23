@@ -1,9 +1,17 @@
+
+// Copyright (c) 2025 Piotr Białek
+// Copyright (c) 2025 Mateusz Rajs
+// Copyright (c) 2025 Mikołaj Rams
+// Copyright (c) 2025 Antoni Długosz
+//
+// Licensed under the MIT license
+
 #include <cassert>
 #include <chrono>
 #include <cstdint>
 #include <ctime>
 #include <string>
-#include <turbo/clockView.hpp>
+#include <text-editor/clockView.hpp>
 
 t_clock_view::t_clock_view(TRect &rect) : TView(rect) {
   m_last_time = std::string(t_clock_view::time_size, ' ');

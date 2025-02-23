@@ -1,9 +1,18 @@
+
+// Copyright (c) 2025 Piotr Białek
+// Copyright (c) 2025 Mateusz Rajs
+// Copyright (c) 2025 Mikołaj Rams
+// Copyright (c) 2025 Antoni Długosz
+//
+// Licensed under the MIT license
+
 #pragma once
 
 #define Uses_TView
 #include <string>
 #include <tvision/tv.h>
 
+// Represents a clock display in the app
 class t_clock_view : public TView {
   public:
   static constexpr std::string_view time_format = "%H:%M:%S";
