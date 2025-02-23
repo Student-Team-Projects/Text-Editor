@@ -39,8 +39,8 @@
 #define Uses_TDeskTop
 #define Uses_TScrollBar
 #include <optional>
-#include <turbo/clockView.hpp>
-#include <turbo/explorerWindow.hpp>
+#include <text-editor/clockView.hpp>
+#include <text-editor/explorerWindow.hpp>
 #include <tvision/tv.h>
 
 constexpr const int cm_chdir = 102;

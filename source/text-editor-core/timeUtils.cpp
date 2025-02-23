@@ -9,7 +9,7 @@
 #include <ctime>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <turbo-core/timeUtils.hpp>
+#include <text-editor-core/timeUtils.hpp>
 
 time_t timeUtils::getSystemTime() { return time(0); }
 

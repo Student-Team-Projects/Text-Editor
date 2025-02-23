@@ -6,7 +6,7 @@
 //
 // Licensed under the MIT license
 
-#include <turbo/app.hpp>
+#include <text-editor/app.hpp>
 #include <tvision/tv.h>
 
 struct EditWindow : TEditWindow {

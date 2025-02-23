@@ -10,11 +10,11 @@
 #include <debug.hpp>
 #include <filesystem>
 #include <optional>
-#include <turbo/app.hpp>
-#include <turbo/clockView.hpp>
-#include <turbo/dialogs.hpp>
-#include <turbo/editorWindow.hpp>
-#include <turbo/explorerWindow.hpp>
+#include <text-editor/app.hpp>
+#include <text-editor/clockView.hpp>
+#include <text-editor/dialogs.hpp>
+#include <text-editor/editorWindow.hpp>
+#include <text-editor/explorerWindow.hpp>
 #include <tvision/tv.h>
 
 App::App(int argc, char **argv)

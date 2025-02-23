@@ -6,9 +6,9 @@
 //
 // Licensed under the MIT license
 
-#include <turbo-core/timeUtils.hpp>
-#include <turbo/dialogs.hpp>
-#include <turbo/editorWindow.hpp>
+#include <text-editor-core/timeUtils.hpp>
+#include <text-editor/dialogs.hpp>
+#include <text-editor/editorWindow.hpp>
 
 EditWindow::EditWindow(const TRect &rect, TStringView view, int val) noexcept
     : TWindowInit(&TEditWindow::initFrame), TEditWindow(rect, view, val) {

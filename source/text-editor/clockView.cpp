@@ -11,7 +11,7 @@
 #include <cstdint>
 #include <ctime>
 #include <string>
-#include <turbo/clockView.hpp>
+#include <text-editor/clockView.hpp>
 
 t_clock_view::t_clock_view(TRect &rect) : TView(rect) {
   m_last_time = std::string(t_clock_view::time_size, ' ');

@@ -8,7 +8,7 @@
 
 #include <efsw/efsw.hpp>
 #include <string>
-#include <turbo-core/fileWatcher.hpp>
+#include <text-editor-core/fileWatcher.hpp>
 
 tc_file_watcher::tc_file_watcher() : m_watcher(new efsw::FileWatcher()) {
   m_watcher->watch();

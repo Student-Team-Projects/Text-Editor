@@ -13,7 +13,7 @@
 #define Uses_TWindow
 #include <functional>
 #include <map>
-#include <turbo-core/fileWatcher.hpp>
+#include <text-editor-core/fileWatcher.hpp>
 #include <tvision/tv.h>
 
 class t_explorer_outline : public TOutline {

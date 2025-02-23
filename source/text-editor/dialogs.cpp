@@ -8,10 +8,10 @@
 
 #include <strstream>
 
-#include <turbo/dialogs.hpp>
+#include <text-editor/dialogs.hpp>
 #include <tvision/tv.h>
 
-#include <turbo/app.hpp>
+#include <text-editor/app.hpp>
 
 ushort dialogs::execDialog(TDialog *d, void *data) {
   TView *p = TProgram::application->validView(d);

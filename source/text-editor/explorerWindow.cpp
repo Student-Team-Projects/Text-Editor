@@ -13,8 +13,8 @@
 #include <filesystem>
 #include <functional>
 #include <string>
-#include <turbo/app.hpp>
-#include <turbo/explorerWindow.hpp>
+#include <text-editor/app.hpp>
+#include <text-editor/explorerWindow.hpp>
 #include <tvision/tv.h>
 #include <tvision/util.h>
 #include <vector>
