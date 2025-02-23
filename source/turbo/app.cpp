@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <debug.hpp>
 #include <filesystem>
 #include <optional>
 #include <strstream>
@@ -7,7 +8,56 @@
 #include <turbo/explorerWindow.hpp>
 #include <tvision/tv.h>
 
-#include <debug.hpp>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <time.h>
+
+time_t getFileCreationTime(char *path) {
+  struct stat attr;
+  stat(path, &attr);
+  return attr.st_mtime;
+}
+
+struct EditWindow : TEditWindow {
+
+  time_t open_time;
+
+  EditWindow(const TRect &rect, TStringView view, int val) noexcept
+      : TWindowInit(&TEditWindow::initFrame), TEditWindow(rect, view, val) {
+
+    this->open_time = time(0);
+  }
+
+  void handleEvent(TEvent &event) override {
+
+    auto p = editor->fileName;
+
+    if (event.what == evCommand) {
+
+      switch (event.message.command) {
+      case cmSave:
+        if (getFileCreationTime(p) > open_time) {
+          auto result = mujDialog(edSaveModify, p);
+          if (result == cmYes) {
+            TEditWindow::handleEvent(event);
+            this->open_time = getFileCreationTime(p);
+          }
+          // debug("dialog:", dialog);
+          // debug("unsafe save");
+        } else {
+          TEditWindow::handleEvent(event);
+          this->open_time = getFileCreationTime(p);
+        }
+        // debug("cmSave");
+        clearEvent(event);
+        return;
+      }
+    }
+    TEditWindow::handleEvent(event);
+  }
+};
 
 ushort execDialog(TDialog *d, void *data) {
   TView *p = TProgram::application->validView(d);
@@ -130,7 +180,9 @@ t_hello_app::t_hello_app(int argc, char **argv)
     disableCommands(ts);
     cascade();
   }
-  { TEditor::editorDialog = mujDialog; }
+  {
+    TEditor::editorDialog = mujDialog;
+  }
   {
     while (--argc) {
       newEditor(std::optional<char *>(*++argv));
@@ -192,7 +244,7 @@ auto t_hello_app::createReplaceDialog() -> TDialog * {
 auto t_hello_app::newEditor(std::optional<char *> path) -> void {
   auto rect = deskTop->getExtent();
   rect.a.x += (m_explorer->visible() ? m_explorer->size.x : 0);
-  auto *editor = new TEditWindow(rect, path.value_or(nullptr), wnNoNumber);
+  auto *editor = new EditWindow(rect, path.value_or(nullptr), wnNoNumber);
   deskTop->insert(editor);
 }
 
@@ -242,16 +294,17 @@ auto t_hello_app::handleEvent(TEvent &event) -> void {
       fileNew();
       clearEvent(event);
       break;
+      // case cmSave:
+      // fileNew();
+      // clearEvent(event);
+      // break;
+
     case cm_chdir:
       chdir();
       clearEvent(event);
       break;
     case cm_toggle_tree:
       m_explorer->toggle_tree();
-      clearEvent(event);
-      break;
-    case cm_open_guy:
-      newEditor(std::optional<char *>(*static_cast<char **>(event.message.infoPtr)));
       clearEvent(event);
       break;
     default:
