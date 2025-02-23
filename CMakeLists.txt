@@ -41,4 +41,5 @@ target_compile_features(text-editor PRIVATE cxx_std_20)
 set_warnings(text-editor)
 target_link_libraries(text-editor PRIVATE
 text-editor-core
+tvterm-core
 )
