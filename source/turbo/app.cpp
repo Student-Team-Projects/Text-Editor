@@ -250,6 +250,10 @@ auto t_hello_app::handleEvent(TEvent &event) -> void {
       m_explorer->toggle_tree();
       clearEvent(event);
       break;
+    case cm_open_guy:
+      newEditor(std::optional<char *>(*static_cast<char **>(event.message.infoPtr)));
+      clearEvent(event);
+      break;
     default:
       break;
     }

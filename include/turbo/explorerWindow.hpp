@@ -3,6 +3,7 @@
 #define Uses_TApplication
 #define Uses_TOutline
 #define Uses_TWindow
+#include <functional>
 #include <map>
 #include <turbo-core/fileWatcher.hpp>
 #include <tvision/tv.h>
@@ -10,7 +11,8 @@
 class t_explorer_outline : public TOutline {
   public:
   t_explorer_outline(const TRect &bounds, TScrollBar *hsb, TScrollBar *vsb,
-                     const std::string &path);
+                     const std::string &path,
+                     const std::function<void(std::string)> &on_open);
   auto adjust(TNode *node, bool expand) -> void override;
   auto selected(int idx) -> void override;
   auto change_dir(const std::string &path) -> void;
@@ -35,6 +37,7 @@ class t_explorer_outline : public TOutline {
   std::map<TNode *, efsw::WatchID> m_watch_ids;
   std::string m_root_path;
   tc_file_watcher m_watcher;
+  std::function<void(std::string)> m_on_open;
 };
 
 class t_explorer_window : public TWindow {

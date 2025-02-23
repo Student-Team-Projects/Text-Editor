@@ -12,8 +12,9 @@
 #include <vector>
 
 t_explorer_outline::t_explorer_outline(const TRect &bounds, TScrollBar *hsb,
-                                       TScrollBar *vsb, const std::string &path)
-    : TOutline(bounds, hsb, vsb, nullptr), m_root_path(path) {
+                                       TScrollBar *vsb, const std::string &path,
+                                       const std::function<void(std::string)> &on_open)
+    : TOutline(bounds, hsb, vsb, nullptr), m_root_path(path), m_on_open(on_open) {
   root = new TNode(path);
   populate_directory(root);
   root->expanded = true;
@@ -36,6 +37,9 @@ auto t_explorer_outline::selected(int idx) -> void {
   TOutline::selected(idx);
   auto *node = get_focused();
   adjust(node, not node->expanded);
+  if (node->childList == nullptr) {
+    m_on_open(node_to_path(node).substr(0, node_to_path(node).size() - 1));
+  }
 }
 auto t_explorer_outline::set_watcher(TNode *node) -> void {
   assert(not m_watch_ids.contains(node));
@@ -176,7 +180,10 @@ t_explorer_window::t_explorer_window(const TRect &bounds, const std::string &pat
     : TWindowInit(&t_explorer_window::initFrame), TWindow(bounds, "Explorer", wnNoNumber) {
   auto *hsb = standardScrollBar(sbHorizontal);
   auto *vsb = standardScrollBar(sbVertical);
-  m_outline = new t_explorer_outline(getExtent().grow(-1, -1), hsb, vsb, path);
+  m_outline = new t_explorer_outline(
+      getExtent().grow(-1, -1), hsb, vsb, path, [this](std::string path) {
+        message(t_hello_app::app, evCommand, cm_open_guy, &path);
+      });
   insert(m_outline);
 }
 auto t_explorer_window::close() -> void {

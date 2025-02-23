@@ -30,13 +30,14 @@
 #define Uses_TStatusDef
 #define Uses_TDeskTop
 #define Uses_TScrollBar
+#include <optional>
 #include <turbo/clockView.hpp>
 #include <turbo/explorerWindow.hpp>
 #include <tvision/tv.h>
-#include <optional>
 
 const int cm_chdir = 102;
 const int cm_toggle_tree = 103;
+const int cm_open_guy = 104;
 
 class t_hello_app : public TApplication {
   public:
