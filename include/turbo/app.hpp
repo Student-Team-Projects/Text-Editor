@@ -38,6 +38,7 @@
 const int cm_chdir = 102;
 const int cm_toggle_tree = 103;
 const int cm_open_guy = 104;
+const int open_help = 105;
 
 class t_hello_app : public TApplication {
   public:
@@ -48,6 +49,8 @@ class t_hello_app : public TApplication {
   auto idle() -> void override;
   static auto initMenuBar(TRect rect) -> TMenuBar *;
   static auto initStatusLine(TRect rect) -> TStatusLine *;
+
+  static auto createHelpDialog() -> TDialog *;
 
   auto newEditor(std::optional<char *> path) -> void;
 

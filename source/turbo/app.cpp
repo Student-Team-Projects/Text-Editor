@@ -189,6 +189,62 @@ auto t_hello_app::createReplaceDialog() -> TDialog * {
   return d;
 }
 
+auto t_hello_app::createHelpDialog() -> TDialog * {
+  auto *d = new TDialog(TRect(0, 0, 80, 32), "Help");
+  d->options |= ofCentered;
+
+  d->insert(new TLabel(TRect(1, 1, 78, 2), "Keyboard Shortcuts", nullptr));
+
+  std::array<int, 2> x = {3, 3};
+#define add_entry(col, text)                                                               \
+  d->insert(                                                                               \
+      new TLabel(TRect(col ? 41 : 1, x[col], col ? 78 : 40, x[col] + 1), text, nullptr));  \
+  x[col] += 1;
+
+  add_entry(0, "Ctrl-A: Select All");
+  add_entry(0, "Ctrl-C: Page Down");
+  add_entry(0, "Ctrl-D: Char Right");
+  add_entry(0, "Ctrl-E: Line Up");
+  add_entry(0, "Ctrl-F: Word Right");
+  add_entry(0, "Ctrl-G: Del Char");
+  add_entry(0, "Ctrl-H: BackSpace");
+  add_entry(0, "Ctrl-L: Search Again");
+  add_entry(0, "Ctrl-M: New Line");
+  add_entry(0, "Ctrl-O: Indent Mode");
+  add_entry(0, "Ctrl-P: Encoding");
+  add_entry(0, "Ctrl-Q: Quit");
+  add_entry(0, "Ctrl-R: Page Up");
+  add_entry(0, "Ctrl-S: Char Left");
+  add_entry(0, "Ctrl-T: Del Word");
+  add_entry(0, "Ctrl-U: Undo");
+  add_entry(0, "Ctrl-X: Line Down");
+  add_entry(0, "Ctrl-Y: Del Line");
+  add_entry(0, "Left: Char Left");
+  add_entry(0, "Right: Char Right");
+
+  add_entry(1, "Alt-Back: Del Word Left");
+  add_entry(1, "Ctrl-Back: Del Word Left");
+  add_entry(1, "Ctrl-Del: Del Word");
+  add_entry(1, "Ctrl-Left: Word Left");
+  add_entry(1, "Ctrl-Right: Word Right");
+  add_entry(1, "Home: Line Start");
+  add_entry(1, "End: Line End");
+  add_entry(1, "Up: Line Up");
+  add_entry(1, "Down: Line Down");
+  add_entry(1, "PgUp: Page Up");
+  add_entry(1, "PgDn: Page Down");
+  add_entry(1, "Ctrl-Home: Text Start");
+  add_entry(1, "Ctrl-End: Text End");
+  add_entry(1, "Ins: Ins Mode");
+  add_entry(1, "Del: Del Char");
+  add_entry(1, "Shift-Ins: Paste");
+  add_entry(1, "Shift-Del: Cut");
+  add_entry(1, "Ctrl-Ins: Copy");
+  add_entry(1, "Ctrl-Del: Clear");
+
+  return d;
+}
+
 auto t_hello_app::newEditor(std::optional<char *> path) -> void {
   auto rect = deskTop->getExtent();
   rect.a.x += (m_explorer->visible() ? m_explorer->size.x : 0);
@@ -254,7 +310,10 @@ auto t_hello_app::handleEvent(TEvent &event) -> void {
       newEditor(std::optional<char *>(*static_cast<char **>(event.message.infoPtr)));
       clearEvent(event);
       break;
-    default:
+    case open_help:
+      auto *dialog = createHelpDialog();
+      deskTop->execView(dialog);
+      clearEvent(event);
       break;
     }
   }
@@ -293,8 +352,11 @@ auto t_hello_app::initMenuBar(TRect rect) -> TMenuBar * {
       *new TMenuItem("~P~revious", cmPrev, kbShiftF6, hcNoContext, "Shift-F6") +
       *new TMenuItem("~C~lose", cmClose, kbCtrlW, hcNoContext, "Ctrl+W");
 
+  TSubMenu &sub5 = *new TSubMenu("~H~elp", kbAltH) +
+                   *new TMenuItem("~H~elp", open_help, kbF1, hcNoContext, "F1");
+
   rect.b.y = rect.a.y + 1;
-  return new TMenuBar(rect, sub1 + sub2 + sub3 + sub4);
+  return new TMenuBar(rect, sub1 + sub2 + sub3 + sub4 + sub5);
 }
 
 auto t_hello_app::initStatusLine(TRect rect) -> TStatusLine * {
