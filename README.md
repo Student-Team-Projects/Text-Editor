@@ -7,6 +7,7 @@ A simple terminal based text editor.
 * [efsw](https://github.com/SpartanJ/efsw) - A file system watcher library
 * [tvision](https://github.com/magiblot/tvision) - Termnal editor library
 * [tvterm](https://github.com/magiblot/tvterm) - Terminal emulator
+* [debug.h](https://github.com/Heltion/debug.h) - Debugging file
 
 ## License
 
