@@ -4,8 +4,9 @@ A simple terminal based text editor.
 
 ## Other projects used in this project
 
-* [efsw](https://github.com/SpartanJ/efsw)
-* [tvision](https://github.com/magiblot/tvision)
+* [efsw](https://github.com/SpartanJ/efsw) - A file system watcher library
+* [tvision](https://github.com/magiblot/tvision) - Termnal editor library
+* [tvterm](https://github.com/magiblot/tvterm) - Terminal emulator
 
 ## License
 

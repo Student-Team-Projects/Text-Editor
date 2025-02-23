@@ -6,7 +6,6 @@
 //
 // Licensed under the MIT license
 
-#include "text-editor/terminal.hpp"
 #include <algorithm>
 #include <debug.hpp>
 #include <filesystem>
@@ -16,6 +15,7 @@
 #include <text-editor/dialogs.hpp>
 #include <text-editor/editorWindow.hpp>
 #include <text-editor/explorerWindow.hpp>
+#include <text-editor/terminal.hpp>
 #include <tvision/tv.h>
 
 App::App(int argc, char **argv)
@@ -248,9 +248,8 @@ auto App::handleEvent(TEvent &event) -> void {
       clearEvent(event);
       break;
     case cm_open_term:
-      auto *term = new t_terminal(
-default_bounds(deskTop->getExtent()));
-      if(term) {
+      auto *term = new t_terminal(default_bounds(deskTop->getExtent()));
+      if (term) {
         deskTop->insert(term);
       }
     }
