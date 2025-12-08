@@ -4,7 +4,7 @@
 #define Uses_TPoint
 #include <tvision/tv.h>
 
-#include <turbo/scintilla/internals.h>
+#include <scintilla/internals.h>
 
 namespace turbo {
 class TScintillaParent;

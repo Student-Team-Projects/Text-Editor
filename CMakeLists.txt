@@ -2,6 +2,10 @@ cmake_minimum_required (VERSION 3.16)
 
 project (text-editor)
 
+set(TURBO_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR})
+
+include(GNUInstallDirs)
+
 function(set_warnings t)
     target_compile_options(${t} PRIVATE
         -Wall -Wextra -Wpedantic -Wconversion -Wsign-conversion -Wcast-qual -Wformat=2 -Wundef -g -D_GLIBCXX_DEBUG
@@ -39,7 +43,7 @@ list(APPEND SCILEXERS_SRC
 add_library(scintilla OBJECT ${SCINTILLA_SRC})
 add_library(scilexers OBJECT ${SCILEXERS_SRC})
 
-function(turbo_set_warnings t)
+function(set_warnings t)
     if (NOT ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC"))
         target_compile_options(${t} PRIVATE
             -Wall
@@ -52,8 +56,8 @@ function(turbo_set_warnings t)
 endfunction()
 
 foreach(t scintilla scilexers)
-    target_compile_features(${t} PUBLIC cxx_std_17)
-    turbo_set_warnings(${t})
+    target_compile_features(${t} PUBLIC cxx_std_20)
+    set_warnings(${t})
     target_include_directories(${t} PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/include/scintilla/include"
         "${CMAKE_CURRENT_LIST_DIR}/include/scintilla/lexlib"
@@ -94,6 +98,7 @@ target_include_directories(text-editor-core PUBLIC
 )
 target_include_directories(text-editor-core PRIVATE
     "${CMAKE_CURRENT_LIST_DIR}/source/text-editor-core"
+    "${CMAKE_CURRENT_LIST_DIR}/source/text-editor-core/platform"
 )
 target_link_libraries(text-editor-core PUBLIC
     tvision
@@ -107,6 +112,7 @@ add_executable(text-editor ${TEXT_EDITOR_SRC})
 target_compile_features(text-editor PRIVATE cxx_std_20)
 set_warnings(text-editor)
 target_link_libraries(text-editor PRIVATE
-text-editor-core
-tvterm-core
+    text-editor-core
+    tvterm-core
 )
+install(TARGETS text-editor RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})

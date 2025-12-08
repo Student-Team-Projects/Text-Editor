@@ -16,6 +16,7 @@
 #include <text-editor/editorWindow.hpp>
 #include <text-editor/explorerWindow.hpp>
 #include <text-editor/terminal.hpp>
+#include <text-editor/scintillaEditorWindow.hpp>
 #include <tvision/tv.h>
 
 App::App(int argc, char **argv)
@@ -182,7 +183,8 @@ auto App::newEditor(std::optional<char *> path) -> void {
   auto rect = deskTop->getExtent();
   rect.b.y -= 12;
   rect.a.x += (m_explorer->visible() ? m_explorer->size.x : 0);
-  auto *editor = new EditWindow(rect, path.value_or(nullptr), wnNoNumber);
+  // auto *editor = new EditWindow(rect, path.value_or(nullptr), wnNoNumber);
+  auto *editor = new ScintillaEditWindow(rect, path.value_or(nullptr), wnNoNumber);
   deskTop->insert(editor);
 }
 
