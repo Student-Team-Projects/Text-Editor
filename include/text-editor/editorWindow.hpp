@@ -1,22 +1,23 @@
-
-// Copyright (c) 2025 Piotr Białek
-// Copyright (c) 2025 Mateusz Rajs
-// Copyright (c) 2025 Mikołaj Rams
-// Copyright (c) 2025 Antoni Długosz
-//
-// Licensed under the MIT license
-
+#pragma once
 #include <text-editor/app.hpp>
-#include <tvision/tv.h>
+#include <text-editor/editorView.hpp>
+#include <text-editor/editor.hpp>
 
-struct EditWindow : TEditWindow {
+struct EditorWindow : TWindow{
 
-  EditWindow(const TRect &rect, TStringView view, int val) noexcept;
+public:
+  EditorWindow(const TRect& bounds, TStringView aTitle, short aNumber)noexcept;
 
   void handleEvent(TEvent &event) override;
 
-  private:
-  // last modification this editor made to the file
-  time_t open_time;
-};
+  virtual void changeBounds(const TRect& bounds);
 
+private:
+  TRect viewBounds(const TRect& bounds);
+
+public:
+  time_t open_time;
+private:
+  EditorView view;
+  Editor editor; //potentially multiple editors in the future
+};
