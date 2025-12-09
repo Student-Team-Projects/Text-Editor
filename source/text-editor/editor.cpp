@@ -13,6 +13,14 @@ Editor::Editor(){
     turbo::call(scintilla, SCI_SETTABWIDTH, 4, 0U);
     turbo::call(scintilla, SCI_SETTABINDENTS, true, 0U);
     turbo::call(scintilla, SCI_SETBACKSPACEUNINDENTS, true, 0U);
+
+    //Style configuration
+    TColorAttr textColor = {0xFFFFFF, 0x000000};
+    turbo::setStyleColor(scintilla, STYLE_DEFAULT, textColor);
+    turbo::call(scintilla, SCI_STYLECLEARALL, 0, 0);
+
+    TColorAttr selectionColor = {0xFFFFFF, 0x444466};
+    turbo::setSelectionColor(scintilla, selectionColor);
 }
 
 void Editor::setSize(const TPoint& size){
@@ -33,6 +41,10 @@ void Editor::handleEvent(TEvent& event){
         turbo::handleKeyDown(scintilla, event.keyDown);
     }
     //TODO: handle mouse events
+}
+
+TPoint Editor::pointMainCaret(){
+    return turbo::pointMainCaret(scintilla);
 }
 
 void Editor::addObserver(EditorObserver* observer){

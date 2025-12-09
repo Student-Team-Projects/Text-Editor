@@ -3,6 +3,8 @@
 EditorView::EditorView(const TRect& bounds) noexcept : TSurfaceView(bounds){
     surface = &drawSurface;
     drawSurface.resize(bounds.b - bounds.a);
+    options |= ofSelectable;
+    showCursor();
 }
 
 void EditorView::resize(const TRect& bounds) noexcept{
@@ -17,6 +19,8 @@ void EditorView::resize(const TRect& bounds) noexcept{
 
 void EditorView::paint(){
     if(editor){
+        cursor = editor->pointMainCaret() - delta;
+        showCursor();
         editor->paint(drawSurface, TRect({0, 0}, size));
     }
 }

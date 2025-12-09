@@ -18,6 +18,7 @@ public:
     void setSize(const TPoint& size);
     void paint(TDrawSurface& surface, TRect area);
     void handleEvent(TEvent &event);
+    TPoint pointMainCaret();
     //observers
     void addObserver(EditorObserver* observer);
     void removeObserver(EditorObserver* observer);
