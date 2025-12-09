@@ -5,6 +5,8 @@
 #include <tvision/surface.h>
 #include <tvision/views.h>
 
+//experimental class. Tried to figure out how things work - Kacper
+
 struct ScintillaView : TSurfaceView
 {
     ScintillaView(const TRect &bounds, const TDrawSurface _FAR *aSurface=0)noexcept;

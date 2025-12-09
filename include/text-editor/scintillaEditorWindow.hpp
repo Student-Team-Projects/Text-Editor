@@ -6,6 +6,8 @@
 #include <scintilla/tscintilla.h>
 #include <scintilla.h>
 
+//experimental class. Tried to figure out how things work - Kacper
+
 struct ScintillaEditWindow : TWindow, turbo::TScintillaParent{
     ScintillaEditWindow(const TRect& bounds, TStringView aTitle, short aNumber) noexcept;
 
@@ -22,6 +24,8 @@ struct ScintillaEditWindow : TWindow, turbo::TScintillaParent{
     time_t open_time;
     int x = 0;
     int y = 0;
+    int a = 10;
+    int b = 10;
     ushort color = 0;
     TDrawSurface *surface;
     ScintillaView *view;

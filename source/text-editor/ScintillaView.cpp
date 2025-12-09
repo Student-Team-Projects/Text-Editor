@@ -1,6 +1,8 @@
 #include <text-editor/ScintillaView.hpp>
 #include <iostream>
 
+//experimental class. Tried to figure out how things work - Kacper
+
 ScintillaView::ScintillaView(const TRect &bounds, const TDrawSurface _FAR *aSurface) :
     TSurfaceView(bounds, aSurface) {
 
