@@ -8,6 +8,8 @@
 #ifndef CELLBUFFER_H
 #define CELLBUFFER_H
 
+#include <chrono>
+
 namespace Scintilla {
 
 // Interface to per-line data that wants to see each line insertion and deletion
@@ -60,6 +62,8 @@ class UndoHistory {
 	int undoSequenceDepth;
 	int savePoint;
 	int tentativePoint;
+
+	std::chrono::steady_clock::time_point lastActionTime;
 
 	void EnsureUndoRoom();
 

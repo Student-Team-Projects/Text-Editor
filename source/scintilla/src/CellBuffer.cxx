@@ -5,6 +5,7 @@
 // Copyright 1998-2001 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
+#include <chrono>
 #include <cstddef>
 #include <cstdlib>
 #include <cassert>
@@ -355,6 +356,8 @@ UndoHistory::UndoHistory() {
 	savePoint = 0;
 	tentativePoint = -1;
 
+	lastActionTime = std::chrono::steady_clock::now();
+
 	actions[currentAction].Create(startAction);
 }
 
@@ -376,6 +379,11 @@ const char *UndoHistory::AppendAction(actionType at, Sci::Position position, con
 	//Platform::DebugPrintf("%% %d action %d %d %d\n", at, position, lengthData, currentAction);
 	//Platform::DebugPrintf("^ %d action %d %d\n", actions[currentAction - 1].at,
 	//	actions[currentAction - 1].position, actions[currentAction - 1].lenData);
+
+	auto now = std::chrono::steady_clock::now();
+	bool afk = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastActionTime).count() > 1000; // if afk > 1 sec
+	lastActionTime = now;
+
 	if (currentAction < savePoint) {
 		savePoint = -1;
 	}
@@ -403,10 +411,22 @@ const char *UndoHistory::AppendAction(actionType at, Sci::Position position, con
 				;	// A coalescible containerAction
 			} else if ((at != actPrevious->at) && (actPrevious->at != startAction)) {
 				currentAction++;
-			} else if ((at == insertAction) &&
-			           (position != (actPrevious->position + actPrevious->lenData))) {
-				// Insertions must be immediately after to coalesce
-				currentAction++;
+			} else if (at == insertAction) {
+			    if (position != (actPrevious->position + actPrevious->lenData)) {
+					currentAction++;
+				} else if (afk) {
+				    currentAction++;
+				} else {
+				    char cur = data[0];
+					char prev = actPrevious->data[actPrevious->lenData - 1];
+					if (cur == prev) {
+					    // don't split
+					} else {
+					    if (prev == ' ' || prev == '\n') {
+					        currentAction++;
+						}
+					}
+				}
 			} else if (at == removeAction) {
 				if ((lengthData == 1) || (lengthData == 2)) {
 					if ((position + lengthData) == actPrevious->position) {
@@ -502,7 +522,7 @@ void UndoHistory::TentativeCommit() {
 }
 
 bool UndoHistory::TentativeActive() const noexcept {
-	return tentativePoint >= 0; 
+	return tentativePoint >= 0;
 }
 
 int UndoHistory::TentativeSteps() noexcept {
@@ -1300,4 +1320,3 @@ void CellBuffer::PerformRedoStep() {
 	}
 	uh.CompletedRedoStep();
 }
-
