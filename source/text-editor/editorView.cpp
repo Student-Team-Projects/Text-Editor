@@ -33,6 +33,9 @@ void EditorView::attachEditor(Editor* newEditor){
 }
 
 void EditorView::editorUpdate(){
+    TCommandSet s;
+    s.enableCmd(cmSave);
+    enableCommands(s);
     paint();
     draw();
 }

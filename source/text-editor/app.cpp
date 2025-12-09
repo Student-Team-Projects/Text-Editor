@@ -264,7 +264,7 @@ auto App::initMenuBar(TRect rect) -> TMenuBar * {
   TSubMenu &sub1 = *new TSubMenu("~F~ile", kbAltF) +
                    *new TMenuItem("~O~pen", cmOpen, kbF3, hcNoContext, "F3") +
                    *new TMenuItem("~N~ew", cmNew, kbCtrlN, hcNoContext, "Ctrl-N") +
-                   *new TMenuItem("~S~ave", cmSave, kbF2, hcNoContext, "F2") +
+                   *new TMenuItem("~S~ave", cmSave, kbCtrlS, hcNoContext, "F2") +
                    *new TMenuItem("S~a~ve as...", cmSaveAs, kbNoKey) + newLine() +
                    *new TMenuItem("~C~hange dir...", cm_chdir, kbNoKey) +
                    *new TMenuItem("~D~OS shell", cmDosShell, kbNoKey) +

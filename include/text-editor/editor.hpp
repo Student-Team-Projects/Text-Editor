@@ -4,6 +4,7 @@
 #include <scintilla.h>
 #include <scintilla/tscintilla.h>
 #include <set>
+#include <string>
 
 struct EditorObserver{
 public:
@@ -28,10 +29,16 @@ public:
     virtual void setVerticalScrollPos(int delta, int limit) noexcept;
     virtual void setHorizontalScrollPos(int delta, int limit) noexcept;
 
+    //file manipulation
+    void openFile(const std::string& path);
+    void readFile();
+    void saveFile();
+
 private:
     void updateAll();
 
 private:
+    std::string path;
     turbo::TScintilla scintilla;
     TPoint size = {0, 0};
     std::set<EditorObserver*> observers;
