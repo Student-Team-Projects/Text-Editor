@@ -1,11 +1,11 @@
 #include <text-editor/editorView.hpp>
 
-EditorView::EditorView(const TRect& bounds) : TSurfaceView(bounds){
+EditorView::EditorView(const TRect& bounds) noexcept : TSurfaceView(bounds){
     surface = &drawSurface;
     drawSurface.resize(bounds.b - bounds.a);
 }
 
-void EditorView::resize(const TRect& bounds){
+void EditorView::resize(const TRect& bounds) noexcept{
     drawSurface.resize(bounds.b - bounds.a);
     if(editor){
         editor->setSize(bounds.b - bounds.a);

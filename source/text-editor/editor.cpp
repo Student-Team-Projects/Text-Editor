@@ -30,7 +30,6 @@ void Editor::handleEvent(TEvent& event){
             saveFile();
         }
     }else if(event.what == evKeyboard){
-        std::cerr << "key down " <<  event.keyDown.text << "\n";
         turbo::handleKeyDown(scintilla, event.keyDown);
     }
     //TODO: handle mouse events
