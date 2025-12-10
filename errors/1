@@ -1,0 +1,39 @@
+=================================================================
+==11615==ERROR: AddressSanitizer: attempting free on address which was not malloc()-ed: 0x51f000000f38 in thread T0
+    #0 0x751ecceb724f in operator delete(void*, unsigned long) ../../../../src/libsanitizer/asan/asan_new_delete.cpp:172
+    #1 0x56844fb18786 in EditorView::~EditorView() /home/lynx/tcs/pp1/Text-Editor/include/text-editor/editorView.hpp:8
+    #2 0x56844fb0aa9f in TObject::destroy(TObject*) /home/lynx/tcs/pp1/Text-Editor/deps/tvision/include/tvision/tvobjs.h:53
+    #3 0x56844ff6f1c6 in TGroup::shutDown() /home/lynx/tcs/pp1/Text-Editor/deps/tvision/source/tvision/tgroup.cpp:52
+    #4 0x56844ffbc2e7 in TWindow::shutDown() /home/lynx/tcs/pp1/Text-Editor/deps/tvision/source/tvision/twindow.cpp:76
+    #5 0x56844fb0aa46 in TObject::destroy(TObject*) /home/lynx/tcs/pp1/Text-Editor/deps/tvision/include/tvision/tvobjs.h:52
+    #6 0x56844ffbc292 in TWindow::close() /home/lynx/tcs/pp1/Text-Editor/deps/tvision/source/tvision/twindow.cpp:69
+    #7 0x56844ffbcaf0 in TWindow::handleEvent(TEvent&) /home/lynx/tcs/pp1/Text-Editor/deps/tvision/source/tvision/twindow.cpp:124
+    #8 0x56844fb18fc6 in EditorWindow::handleEvent(TEvent&) /home/lynx/tcs/pp1/Text-Editor/source/text-editor/editorWindow.cpp:13
+    #9 0x56844ff7145d in doHandleEvent /home/lynx/tcs/pp1/Text-Editor/deps/tvision/source/tvision/tgroup.cpp:349
+    #10 0x56844ff7168e in TGroup::handleEvent(TEvent&) /home/lynx/tcs/pp1/Text-Editor/deps/tvision/source/tvision/tgroup.cpp:369
+    #11 0x56844ff5ad3a in TDeskTop::handleEvent(TEvent&) /home/lynx/tcs/pp1/Text-Editor/deps/tvision/source/tvision/tdesktop.cpp:102
+    #12 0x56844ff7145d in doHandleEvent /home/lynx/tcs/pp1/Text-Editor/deps/tvision/source/tvision/tgroup.cpp:349
+    #13 0x56844ff7168e in TGroup::handleEvent(TEvent&) /home/lynx/tcs/pp1/Text-Editor/deps/tvision/source/tvision/tgroup.cpp:369
+    #14 0x56844ff99134 in TProgram::handleEvent(TEvent&) /home/lynx/tcs/pp1/Text-Editor/deps/tvision/source/tvision/tprogram.cpp:204
+    #15 0x56844ff4ae14 in TApplication::handleEvent(TEvent&) /home/lynx/tcs/pp1/Text-Editor/deps/tvision/source/tvision/tapplica.cpp:94
+    #16 0x56844fb05e61 in App::handleEvent(TEvent&) /home/lynx/tcs/pp1/Text-Editor/source/text-editor/app.cpp:227
+    #17 0x56844ff7025f in TGroup::execute() /home/lynx/tcs/pp1/Text-Editor/deps/tvision/source/tvision/tgroup.cpp:180
+    #18 0x56844ff9a283 in TProgram::run() /home/lynx/tcs/pp1/Text-Editor/deps/tvision/source/tvision/tprogram.cpp:314
+    #19 0x56844fb0a37e in main /home/lynx/tcs/pp1/Text-Editor/source/text-editor/app.cpp:335
+    #20 0x751ecc629d8f in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #21 0x751ecc629e3f in __libc_start_main_impl ../csu/libc-start.c:392
+    #22 0x56844fafb944 in _start (/home/lynx/tcs/pp1/Text-Editor/build/text-editor+0x4a6944)
+
+0x51f000000f38 is located 184 bytes inside of 3080-byte region [0x51f000000e80,0x51f000001a88)
+allocated by thread T0 here:
+    #0 0x751ecceb61e7 in operator new(unsigned long) ../../../../src/libsanitizer/asan/asan_new_delete.cpp:99
+    #1 0x56844fb04cc6 in App::newEditor(std::optional<char*>) /home/lynx/tcs/pp1/Text-Editor/source/text-editor/app.cpp:188
+    #2 0x56844fb0543f in App::fileNew() /home/lynx/tcs/pp1/Text-Editor/source/text-editor/app.cpp:207
+    #3 0x56844fb05f73 in App::handleEvent(TEvent&) /home/lynx/tcs/pp1/Text-Editor/source/text-editor/app.cpp:235
+    #4 0x56844ff7025f in TGroup::execute() /home/lynx/tcs/pp1/Text-Editor/deps/tvision/source/tvision/tgroup.cpp:180
+    #5 0x56844ff9a283 in TProgram::run() /home/lynx/tcs/pp1/Text-Editor/deps/tvision/source/tvision/tprogram.cpp:314
+    #6 0x56844fb0a37e in main /home/lynx/tcs/pp1/Text-Editor/source/text-editor/app.cpp:335
+    #7 0x751ecc629d8f in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+
+SUMMARY: AddressSanitizer: bad-free ../../../../src/libsanitizer/asan/asan_new_delete.cpp:172 in operator delete(void*, unsigned long)
+==11615==ABORTING

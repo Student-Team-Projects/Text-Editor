@@ -12,6 +12,17 @@ function(set_warnings t)
     )
 endfunction()
 
+if (CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
+    # Enable Address Sanitizer flags for memory error detection
+    set(ASAN_FLAGS "-fsanitize=address -fno-omit-frame-pointer")
+    
+    # Check if the compiler supports ASan and add the flags
+    # Note: Use CMAKE_C_COMPILER_WORKS/CMAKE_CXX_COMPILER_WORKS checks for robustness
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${ASAN_FLAGS}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ASAN_FLAGS}")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${ASAN_FLAGS}")
+endif()
+
 # Target 'scintilla'
 
 # These two could be built in one single target, but we want to enable Unity Build
