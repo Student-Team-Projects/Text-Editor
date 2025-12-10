@@ -1,7 +1,9 @@
 #include <text-editor/editorWindow.hpp>
 
 EditorWindow::EditorWindow(const TRect& bounds, TStringView aTitle, short aNumber) noexcept
-    : TWindowInit(&EditorWindow::initFrame), TWindow(bounds, aTitle, aNumber), view(viewBounds(bounds)){
+    : TWindowInit(&EditorWindow::initFrame), TWindow(bounds, aTitle, aNumber),
+    view(*(new EditorView(viewBounds(bounds))))
+    {
     insert(&view);
     view.attachEditor(&editor);
     editor.openFile(aTitle);

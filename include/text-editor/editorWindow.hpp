@@ -18,6 +18,6 @@ private:
 public:
   time_t open_time;
 private:
-  EditorView view;
+  EditorView& view;
   Editor editor; //potentially multiple editors in the future
 };
