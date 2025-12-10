@@ -104,6 +104,7 @@ void Editor::readFile(){
         turbo::call(scintilla, SCI_APPENDTEXT, readBytes, (sptr_t)buffer);
         remainingBytes -= readBytes;
     }
+    turbo::call(scintilla, SCI_EMPTYUNDOBUFFER, 0, 0);
     turbo::call(scintilla, SCI_SETSAVEPOINT, 0, 0);
     updateAll();
 }
