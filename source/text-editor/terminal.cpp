@@ -52,13 +52,6 @@ t_terminal::t_terminal(const TRect &bounds)
 
 void t_terminal::handleEvent(TEvent &ev) {
   tvterm::BasicTerminalWindow::handleEvent(ev);
-  if (isDisconnected() && !closing) {
-    closing = true;
-    ev.what = evCommand;
-    ev.message.command = cmClose;
-    ev.message.infoPtr = this;
-    putEvent(ev);
-    clearEvent(ev);
-  }
+  // if (isDisconnected()) ev.message.infoPtr = this;
 }
 

@@ -29,8 +29,5 @@ class t_terminal : public tvterm::BasicTerminalWindow {
   public:
   explicit t_terminal(const TRect &bounds);
   void handleEvent(TEvent &ev) override;
-
-  protected:
-  bool closing = false;
 };
 
