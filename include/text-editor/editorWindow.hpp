@@ -9,6 +9,8 @@ public:
   EditorWindow(const TRect& bounds, TStringView aTitle, short aNumber)noexcept;
 
   void handleEvent(TEvent &event) override;
+  
+  void close() override;
 
   virtual void changeBounds(const TRect& bounds);
 

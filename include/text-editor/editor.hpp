@@ -34,6 +34,7 @@ public:
     void openFile(const std::string& path);
     void readFile();
     void saveFile();
+    bool isModified();
 
 private:
     void updateAll();

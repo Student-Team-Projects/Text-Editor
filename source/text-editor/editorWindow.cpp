@@ -10,6 +10,17 @@ EditorWindow::EditorWindow(const TRect& bounds, TStringView aTitle, short aNumbe
     editor.readFile();
 }
 
+void EditorWindow::close(){
+    if(editor.isModified()){
+        auto result = messageBox("File has been modified. Save?", mfConfirmation | mfYesNoCancel);
+        if(result == cmCancel) return;
+        if(result == cmYes){
+            editor.saveFile();
+        }
+    }
+    TWindow::close();
+}
+
 void EditorWindow::handleEvent(TEvent &event){
     editor.handleEvent(event);
     TWindow::handleEvent(event);

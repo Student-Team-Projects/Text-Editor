@@ -124,6 +124,10 @@ void Editor::saveFile(){
     turbo::call(scintilla, SCI_SETSAVEPOINT, 0, 0);
 }
 
+bool Editor::isModified(){
+    return turbo::call(scintilla, SCI_GETMODIFY, 0, 0);
+}
+
 void Editor::updateAll(){
     for(auto observer : observers)observer->editorUpdate();
 }
