@@ -21,11 +21,6 @@ void EditorWindow::close(){
     TWindow::close();
 }
 
-void EditorWindow::handleEvent(TEvent &event){
-    editor.handleEvent(event);
-    TWindow::handleEvent(event);
-}
-
 void EditorWindow::changeBounds(const TRect& bounds){
     view.resize(viewBounds(bounds));
     TWindow::changeBounds(bounds);

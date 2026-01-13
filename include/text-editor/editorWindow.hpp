@@ -7,8 +7,6 @@ struct EditorWindow : TWindow{
 
 public:
   EditorWindow(const TRect& bounds, TStringView aTitle, short aNumber)noexcept;
-
-  void handleEvent(TEvent &event) override;
   
   void close() override;
 

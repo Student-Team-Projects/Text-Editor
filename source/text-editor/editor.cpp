@@ -39,8 +39,9 @@ void Editor::handleEvent(TEvent& event){
         }
     }else if(event.what == evKeyboard){
         turbo::handleKeyDown(scintilla, event.keyDown);
+    }else if(event.what & evMouse){
+        turbo::handleMouse(scintilla, event.what, event.mouse);
     }
-    //TODO: handle mouse events
 }
 
 TPoint Editor::pointMainCaret(){

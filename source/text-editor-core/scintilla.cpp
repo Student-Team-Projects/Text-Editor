@@ -171,10 +171,12 @@ bool handleMouse(TScintilla &self, ushort what, const MouseEventType &mouse)
             case evMouseDown:
                 self.ButtonDownWithModifiers(pt, time, modifiers);
                 break;
+            case evMouseMove:
+                self.ButtonMoveWithModifiers(pt, time, modifiers);
+                break;
             case evMouseUp:
                 self.ButtonUpWithModifiers(pt, time, modifiers);
                 break;
-            case evMouseMove:
             case evMouseAuto:
                 self.ButtonMoveWithModifiers(pt, time, modifiers);
                 break;

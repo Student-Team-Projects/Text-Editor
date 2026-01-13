@@ -11,6 +11,7 @@ public:
     EditorView(const TRect& bounds) noexcept;
     void resize(const TRect& bounds) noexcept;
     void paint();
+    void handleEvent(TEvent& event) override;
     void attachEditor(Editor* newEditor);
     virtual void editorUpdate();
 

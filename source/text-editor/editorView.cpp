@@ -4,6 +4,7 @@ EditorView::EditorView(const TRect& bounds) noexcept : TSurfaceView(bounds){
     surface = &drawSurface;
     drawSurface.resize(bounds.b - bounds.a);
     options |= ofSelectable;
+    eventMask |= evMouseMove;
     showCursor();
 }
 
@@ -34,6 +35,18 @@ void EditorView::attachEditor(Editor* newEditor){
     editor->addObserver(this);
     paint();
     draw();
+}
+
+void EditorView::handleEvent(TEvent& event){
+    if(event.what & evMouse){
+        TPoint local = makeLocal(event.mouse.where);
+        TEvent localEvent = event;
+        localEvent.mouse.where = local;
+        if(editor) editor->handleEvent(localEvent);
+    }else if(event.what == evKeyboard || event.what == evCommand){
+        if(editor) editor->handleEvent(event);
+    }
+    TSurfaceView::handleEvent(event);
 }
 
 void EditorView::editorUpdate(){
