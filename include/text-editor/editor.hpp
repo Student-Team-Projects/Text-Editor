@@ -38,6 +38,7 @@ public:
 
 private:
     void updateAll();
+    void configureStyling(Scintilla::ILexer5* lexer);
 
 private:
     std::string path;

@@ -1,6 +1,9 @@
 #include <text-editor/editor.hpp>
 #include <iostream>
 #include <fstream>
+#include <scintilla/lexlib/LexerModule.h>
+
+extern Scintilla::LexerModule lmCPP;
 
 Editor::Editor(){
     scintilla.setParent(this);
@@ -13,14 +16,6 @@ Editor::Editor(){
     turbo::call(scintilla, SCI_SETTABWIDTH, 4, 0U);
     turbo::call(scintilla, SCI_SETTABINDENTS, true, 0U);
     turbo::call(scintilla, SCI_SETBACKSPACEUNINDENTS, true, 0U);
-
-    //Style configuration
-    TColorAttr textColor = {0xFFFFFF, 0x000000};
-    turbo::setStyleColor(scintilla, STYLE_DEFAULT, textColor);
-    turbo::call(scintilla, SCI_STYLECLEARALL, 0, 0);
-
-    TColorAttr selectionColor = {0xFFFFFF, 0x444466};
-    turbo::setSelectionColor(scintilla, selectionColor);
 }
 
 void Editor::setSize(const TPoint& size){
@@ -86,6 +81,8 @@ long buffSize = 128*1024;
 
 void Editor::openFile(const std::string& path){
     this->path = path;
+    Scintilla::ILexer5* lexer = lmCPP.Create();
+    configureStyling(lexer);
 }
 
 void Editor::readFile(){
@@ -131,4 +128,86 @@ bool Editor::isModified(){
 
 void Editor::updateAll(){
     for(auto observer : observers)observer->editorUpdate();
+}
+
+//temporary stuff for C++ styling
+constexpr std::array<int, 4> stylesC[] =
+{
+    {SCE_C_DEFAULT,                 0,  0xffffff, 0x000000},
+    {SCE_C_COMMENT,                 10, 0xff0000, 0x000000},
+    {SCE_C_COMMENTLINE,             10, 0xff0000, 0x222222},
+    {SCE_C_COMMENTDOC,              10, 0xff0000, 0x0000FF},
+    {SCE_C_NUMBER,                  13, 0x00ff00, 0x000000},
+    {SCE_C_WORD,                    5,  0x00ffff, 0x000000},
+    {SCE_C_STRING,                  11, 0xffff00, 0x000000},
+    {SCE_C_CHARACTER,               12, 0x0000ff, 0x000000},
+    {SCE_C_PREPROCESSOR,            8,  0xff00ff, 0x000000},
+    {SCE_C_OPERATOR,                9,  0xaa00bb, 0x000000},
+    {SCE_C_COMMENTLINEDOC,          10, 0xff0000, 0x00FFFF},
+    {SCE_C_WORD2,                   6,  0x000fff, 0x000000},
+    {SCE_C_GLOBALCLASS,             7,  0xf0ab0f, 0x000000},
+    {SCE_C_PREPROCESSORCOMMENT,     10, 0xf888ff, 0x000000},
+    {SCE_C_PREPROCESSORCOMMENTDOC,  10, 0xf2ff80, 0x000000},
+    {SCE_C_ESCAPESEQUENCE,          14, 0x8888ff, 0x000000},
+};
+
+std::pair<int, std::string> keywordsC[] =
+{
+    {0,
+"alignas alignof and and_eq asm auto bitand bitor break case catch class compl "
+"concept consteval constexpr constinit const_cast continue co_await co_return "
+"co_yield decltype default delete do dynamic_cast else enum explicit export "
+"false final for friend goto if import inline module namespace new noexcept not "
+"not_eq nullptr operator or or_eq override private protected public "
+"reinterpret_cast return sizeof static_assert static_cast struct switch "
+"template this throw true try typedef typeid typename union using virtual while "
+"xor xor_eq "
+    },
+    {1,
+"bool char char8_t char16_t char32_t const double extern float int long mutable "
+"register static short signed unsigned thread_local void volatile wchar_t int8_t "
+"uint8_t int16_t uint16_t int32_t uint32_t int64_t uint64_t size_t ptrdiff_t "
+"intptr_t uintptr_t far near uchar ushort uint ulong "
+    },
+    {3,
+"std"
+    },
+};
+
+std::pair<std::string, std::string> propertiesC[] =
+{
+    {"styling.within.preprocessor",         "1"},
+    {"lexer.cpp.track.preprocessor",        "0"},
+    {"lexer.cpp.escape.sequence",           "1"},
+};
+
+void Editor::configureStyling(Scintilla::ILexer5* lexer){
+    //Style configuration
+    TColorAttr textColor = {0xFFFFFF, 0x000000};
+    turbo::setStyleColor(scintilla, STYLE_DEFAULT, textColor);
+    turbo::call(scintilla, SCI_STYLECLEARALL, 0, 0);
+
+    TColorAttr selectionColor = {0xFFFFFF, 0x444466};
+    turbo::setSelectionColor(scintilla, selectionColor);
+
+    //lexer configuration
+    int id = turbo::call(scintilla, SCI_GETLEXER, 0, 0);
+    std::cerr << "Id before setilexer " << id << "\n";
+    turbo::call(scintilla, SCI_SETILEXER, 0, (sptr_t) lexer);
+    id = turbo::call(scintilla, SCI_GETLEXER, 0, 0);
+    std::cerr << "Id after setilexer " << id << "\n";
+    turbo::call(scintilla, SCI_COLOURISE, 0, -1);
+
+    //color of comments
+    for(int i = 0; i < 16; i++){
+        TColorAttr color = {stylesC[i][2], stylesC[i][3]};
+        turbo::setStyleColor(scintilla, stylesC[i][0], color);
+    }
+
+    for (int i = 0; i < 3; i++){
+        turbo::call(scintilla, SCI_SETKEYWORDS, keywordsC[i].first, (sptr_t)keywordsC[i].second.c_str());
+    }
+    for(int i = 0; i < 3; i++){
+        turbo::call(scintilla, SCI_SETPROPERTY, (sptr_t) propertiesC[i].first.c_str(), (sptr_t)propertiesC[i].second.c_str());
+    }
 }
