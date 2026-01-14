@@ -40,7 +40,12 @@ void Editor::handleEvent(TEvent& event){
     }else if(event.what == evKeyboard){
         turbo::handleKeyDown(scintilla, event.keyDown);
     }else if(event.what & evMouse){
-        turbo::handleMouse(scintilla, event.what, event.mouse);
+        if(event.what == evMouseWheel){
+            int direction = (event.mouse.wheel == mwUp) ? -1 : 1;
+            turbo::call(scintilla, SCI_LINESCROLL, 0, direction);
+        }else{
+            turbo::handleMouse(scintilla, event.what, event.mouse);
+        }
     }
 }
 
