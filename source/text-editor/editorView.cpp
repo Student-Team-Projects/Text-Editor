@@ -4,7 +4,7 @@ EditorView::EditorView(const TRect& bounds) noexcept : TSurfaceView(bounds){
     surface = &drawSurface;
     drawSurface.resize(bounds.b - bounds.a);
     options |= ofSelectable;
-    eventMask |= evMouseMove;
+    eventMask |= evMouseMove | evMouseWheel;
     showCursor();
 }
 
