@@ -38,7 +38,8 @@ public:
 
 private:
     void updateAll();
-    void configureStyling(Scintilla::ILexer5* lexer);
+    void configureStyling(Scintilla::ILexer5* lexer);   
+    Scintilla::ILexer5* getLexerForExtension(const std::string& path);
 
 private:
     std::string path;

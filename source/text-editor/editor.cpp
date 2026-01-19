@@ -84,10 +84,46 @@ void Editor::setHorizontalScrollPos(int delta, int limit) noexcept{
 static char buffer alignas(4*1024) [128*1024 + 1024];
 long buffSize = 128*1024;
 
+Scintilla::ILexer5* Editor::getLexerForExtension(const std::string& path) {
+
+    // std::string ext = std::filesystem::path(path).extension().string();
+
+    size_t pos = path.rfind('.');
+    std::string ext;
+    if(pos != std::string::npos) {
+        ext = path.substr(pos);
+    }
+
+
+    if(ext == ".cpp" || ext == ".cxx" || ext == ".cc" || ext == ".hpp" || ext == ".h") {
+        return lmCPP.Create();  // lexer C++
+    }
+
+    // other languages
+
+    return nullptr;
+}
+
 void Editor::openFile(const std::string& path){
     this->path = path;
-    Scintilla::ILexer5* lexer = lmCPP.Create();
-    configureStyling(lexer);
+    // Scintilla::ILexer5* lexer = lmCPP.Create();
+    // configureStyling(lexer);
+
+    Scintilla::ILexer5* lexer = getLexerForExtension(path);
+
+    // default coloring
+    TColorAttr textColor = {0xFFFFFF, 0x000000};
+    turbo::setStyleColor(scintilla, STYLE_DEFAULT, textColor);
+
+    TColorAttr selectionColor = {0xFFFFFF, 0x444466};
+    turbo::setSelectionColor(scintilla, selectionColor);
+
+    if(lexer) {
+        configureStyling(lexer);
+    } else {
+        turbo::call(scintilla, SCI_SETLEXER, SCLEX_NULL, 0);
+        turbo::call(scintilla, SCI_STYLECLEARALL, 0, 0);
+    }
 }
 
 void Editor::readFile(){
