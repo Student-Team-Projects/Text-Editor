@@ -14,6 +14,13 @@ public:
 struct Editor : turbo::TScintillaParent{
 
 public:
+    enum class Language {
+        None,
+        Cpp,
+        Python,
+        //
+    };
+
     Editor();
     void setSize(const TPoint& size);
     void paint(TDrawSurface& surface, TRect area);
@@ -38,8 +45,8 @@ public:
 
 private:
     void updateAll();
-    void configureStyling(Scintilla::ILexer5* lexer);   
-    Scintilla::ILexer5* getLexerForExtension(const std::string& path);
+    void configureStyling(Scintilla::ILexer5* lexer, Language lang);   
+    std::pair<Scintilla::ILexer5*, Editor::Language>  getLexerForExtension(const std::string& path);
 
 private:
     std::string path;

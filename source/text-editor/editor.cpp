@@ -4,6 +4,7 @@
 #include <scintilla/lexlib/LexerModule.h>
 
 extern Scintilla::LexerModule lmCPP;
+extern Scintilla::LexerModule lmPython;
 
 Editor::Editor(){
     scintilla.setParent(this);
@@ -84,24 +85,21 @@ void Editor::setHorizontalScrollPos(int delta, int limit) noexcept{
 static char buffer alignas(4*1024) [128*1024 + 1024];
 long buffSize = 128*1024;
 
-Scintilla::ILexer5* Editor::getLexerForExtension(const std::string& path) {
+std::pair<Scintilla::ILexer5*, Editor::Language> Editor::getLexerForExtension(const std::string& path) {
 
     // std::string ext = std::filesystem::path(path).extension().string();
 
     size_t pos = path.rfind('.');
     std::string ext;
-    if(pos != std::string::npos) {
+    if(pos != std::string::npos)
         ext = path.substr(pos);
-    }
 
+    if(ext == ".cpp" || ext == ".cxx" || ext == ".cc" || ext == ".hpp" || ext == ".h")
+        return { lmCPP.Create(), Language::Cpp };
+    if(ext == ".py")
+        return { lmPython.Create(), Language::Python };
 
-    if(ext == ".cpp" || ext == ".cxx" || ext == ".cc" || ext == ".hpp" || ext == ".h") {
-        return lmCPP.Create();  // lexer C++
-    }
-
-    // other languages
-
-    return nullptr;
+    return { nullptr, Language::None };
 }
 
 void Editor::openFile(const std::string& path){
@@ -109,21 +107,12 @@ void Editor::openFile(const std::string& path){
     // Scintilla::ILexer5* lexer = lmCPP.Create();
     // configureStyling(lexer);
 
-    Scintilla::ILexer5* lexer = getLexerForExtension(path);
+    // Scintilla::ILexer5* lexer = getLexerForExtension(path);
+    
+    // configureStyling(lexer);
 
-    // default coloring
-    TColorAttr textColor = {0xFFFFFF, 0x000000};
-    turbo::setStyleColor(scintilla, STYLE_DEFAULT, textColor);
-
-    TColorAttr selectionColor = {0xFFFFFF, 0x444466};
-    turbo::setSelectionColor(scintilla, selectionColor);
-
-    if(lexer) {
-        configureStyling(lexer);
-    } else {
-        turbo::call(scintilla, SCI_SETLEXER, SCLEX_NULL, 0);
-        turbo::call(scintilla, SCI_STYLECLEARALL, 0, 0);
-    }
+    auto [lexer, lang] = getLexerForExtension(path);
+    configureStyling(lexer, lang);
 }
 
 void Editor::readFile(){
@@ -222,7 +211,50 @@ std::pair<std::string, std::string> propertiesC[] =
     {"lexer.cpp.escape.sequence",           "1"},
 };
 
-void Editor::configureStyling(Scintilla::ILexer5* lexer){
+
+constexpr std::array<int, 4> stylesPython[] =
+{
+    {SCE_P_DEFAULT,        0xFFFFFF, 0x000000},
+    {SCE_P_COMMENTLINE,    0x008000, 0x000000},
+    {SCE_P_NUMBER,         0x00FF00, 0x000000},
+    {SCE_P_STRING,         0xFFFF00, 0x000000},
+    {SCE_P_CHARACTER,      0x0000FF, 0x000000},
+    {SCE_P_WORD,           0x0000FF, 0x000000},
+    {SCE_P_TRIPLE,         0xFFFF00, 0x000000},
+    {SCE_P_TRIPLEDOUBLE,   0xFFFF00, 0x000000},
+    {SCE_P_CLASSNAME,      0x00FFFF, 0x000000},
+    {SCE_P_DEFNAME,        0x00FFFF, 0x000000},
+    {SCE_P_OPERATOR,       0xAA00BB, 0x000000},
+    {SCE_P_IDENTIFIER,     0xFFFFFF, 0x000000},
+    {SCE_P_COMMENTBLOCK,   0x008000, 0x000000},
+    {SCE_P_STRINGEOL,      0xFFFF00, 0x000000},
+    {SCE_P_WORD2,          0x00AAAA, 0x000000},
+    {SCE_P_DECORATOR,      0xFF8800, 0x000000},
+    {SCE_P_FSTRING,        0xFFFF00, 0x000000},
+    {SCE_P_FCHARACTER,     0x0000FF, 0x000000},
+    {SCE_P_FTRIPLE,        0xFFFF00, 0x000000},
+    {SCE_P_FTRIPLEDOUBLE,  0xFFFF00, 0x000000}
+};
+
+std::pair<int, std::string> keywordsPython[] =
+{
+    {0,
+"and as assert break class continue def del elif else except exec finally for "
+"from global if import in is lambda not or pass print raise return try while "
+"with yield"
+    },
+    {1,
+"int float complex list tuple range str bytes bytearray memoryview set frozenset "
+"dict "
+    },
+};
+
+std::pair<std::string, std::string> propertiesPython[] =
+{
+    {"lexer.python.keywords2.no.sub.identifiers",       "1"},
+};
+
+void Editor::configureStyling(Scintilla::ILexer5* lexer, Language lang){
     //Style configuration
     TColorAttr textColor = {0xFFFFFF, 0x000000};
     turbo::setStyleColor(scintilla, STYLE_DEFAULT, textColor);
@@ -230,6 +262,11 @@ void Editor::configureStyling(Scintilla::ILexer5* lexer){
 
     TColorAttr selectionColor = {0xFFFFFF, 0x444466};
     turbo::setSelectionColor(scintilla, selectionColor);
+
+    if(!lexer) {
+        turbo::call(scintilla, SCI_SETLEXER, SCLEX_NULL, 0);
+        return;
+    }
 
     //lexer configuration
     int id = turbo::call(scintilla, SCI_GETLEXER, 0, 0);
@@ -239,16 +276,31 @@ void Editor::configureStyling(Scintilla::ILexer5* lexer){
     std::cerr << "Id after setilexer " << id << "\n";
     turbo::call(scintilla, SCI_COLOURISE, 0, -1);
 
-    //color of comments
-    for(int i = 0; i < 16; i++){
-        TColorAttr color = {stylesC[i][2], stylesC[i][3]};
-        turbo::setStyleColor(scintilla, stylesC[i][0], color);
-    }
 
-    for (int i = 0; i < 3; i++){
-        turbo::call(scintilla, SCI_SETKEYWORDS, keywordsC[i].first, (sptr_t)keywordsC[i].second.c_str());
-    }
-    for(int i = 0; i < 3; i++){
-        turbo::call(scintilla, SCI_SETPROPERTY, (sptr_t) propertiesC[i].first.c_str(), (sptr_t)propertiesC[i].second.c_str());
+    switch (lang) {
+        case Language::Cpp:
+            for (int i = 0; i < 16; i++) {
+                TColorAttr color = {stylesC[i][2], stylesC[i][3]};
+                turbo::setStyleColor(scintilla, stylesC[i][0], color);
+            }
+            for (int i = 0; i < 3; i++)
+                turbo::call(scintilla, SCI_SETKEYWORDS, keywordsC[i].first, (sptr_t)keywordsC[i].second.c_str());
+            for (int i = 0; i < 3; i++)
+                turbo::call(scintilla, SCI_SETPROPERTY, (sptr_t)propertiesC[i].first.c_str(), (sptr_t)propertiesC[i].second.c_str());
+            break;
+
+        case Language::Python:
+            for (int i = 0; i < 20; i++) {
+                TColorAttr color = {stylesPython[i][1], stylesPython[i][2]};
+                turbo::setStyleColor(scintilla, stylesPython[i][0], color);
+            }
+            for (int i = 0; i < 2; i++)
+                turbo::call(scintilla, SCI_SETKEYWORDS, keywordsPython[i].first, (sptr_t)keywordsPython[i].second.c_str());
+            for (int i = 0; i < 1; i++)
+                turbo::call(scintilla, SCI_SETPROPERTY, (sptr_t)propertiesPython[i].first.c_str(), (sptr_t)propertiesPython[i].second.c_str());
+            break;
+
+        default:
+            break;
     }
 }
