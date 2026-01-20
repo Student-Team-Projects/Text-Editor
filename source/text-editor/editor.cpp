@@ -5,6 +5,9 @@
 
 extern Scintilla::LexerModule lmCPP;
 extern Scintilla::LexerModule lmPython;
+extern Scintilla::LexerModule lmJSON;
+extern Scintilla::LexerModule lmBash;
+extern Scintilla::LexerModule lmPascal;
 
 Editor::Editor(){
     scintilla.setParent(this);
@@ -85,34 +88,61 @@ void Editor::setHorizontalScrollPos(int delta, int limit) noexcept{
 static char buffer alignas(4*1024) [128*1024 + 1024];
 long buffSize = 128*1024;
 
-std::pair<Scintilla::ILexer5*, Editor::Language> Editor::getLexerForExtension(const std::string& path) {
 
-    // std::string ext = std::filesystem::path(path).extension().string();
+static const std::unordered_map<std::string, Language> ext2lang = {
+    {".c",   Language::CPP},
+    {".cc",  Language::CPP},
+    {".cpp", Language::CPP},
+    {".h",   Language::CPP},
 
-    size_t pos = path.rfind('.');
-    std::string ext;
-    if(pos != std::string::npos)
-        ext = path.substr(pos);
+    {".py",  Language::Python},
 
-    if(ext == ".cpp" || ext == ".cxx" || ext == ".cc" || ext == ".hpp" || ext == ".h")
-        return { lmCPP.Create(), Language::Cpp };
-    if(ext == ".py")
-        return { lmPython.Create(), Language::Python };
+    {".json",Language::JSON},
 
-    return { nullptr, Language::None };
+    {".sh",  Language::Bash},
+
+    {".pas", Language::Pascal}
+};
+
+Language detectFileLanguage(const std::string &path)
+{
+    size_t pos = path.find_last_of('.');
+    if (pos != std::string::npos)
+    {
+        std::string ext = path.substr(pos);
+        auto it = ext2lang.find(ext);
+        if (it != ext2lang.end())
+            return it->second;
+    }
+
+    size_t slash = path.find_last_of("/\\");
+    std::string name = (slash == std::string::npos) ? path : path.substr(slash+1);
+
+    auto it2 = ext2lang.find(name);
+    if (it2 != ext2lang.end())
+        return it2->second;
+
+    return Language::None;
+}
+
+Scintilla::ILexer5 *getLexerForLanguage(Language lang)
+{
+    switch(lang)
+    {
+        case Language::CPP:     return lmCPP.Create();
+        case Language::Python:  return lmPython.Create();
+        case Language::JSON:    return lmJSON.Create();
+        case Language::Bash:    return lmBash.Create();
+        case Language::Pascal:    return lmPascal.Create();
+        default: return nullptr;
+    }
 }
 
 void Editor::openFile(const std::string& path){
     this->path = path;
-    // Scintilla::ILexer5* lexer = lmCPP.Create();
-    // configureStyling(lexer);
 
-    // Scintilla::ILexer5* lexer = getLexerForExtension(path);
-    
-    // configureStyling(lexer);
-
-    auto [lexer, lang] = getLexerForExtension(path);
-    configureStyling(lexer, lang);
+    Language language = detectFileLanguage(path);
+    configureStyling(language);
 }
 
 void Editor::readFile(){
@@ -160,7 +190,6 @@ void Editor::updateAll(){
     for(auto observer : observers)observer->editorUpdate();
 }
 
-//temporary stuff for C++ styling
 constexpr std::array<int, 4> stylesC[] =
 {
     {SCE_C_DEFAULT,                 0,  0xffffff, 0x000000},
@@ -254,7 +283,116 @@ std::pair<std::string, std::string> propertiesPython[] =
     {"lexer.python.keywords2.no.sub.identifiers",       "1"},
 };
 
-void Editor::configureStyling(Scintilla::ILexer5* lexer, Language lang){
+constexpr std::array<int, 4> stylesJSON[] =
+{
+    {SCE_JSON_DEFAULT,        0, 0xFFFFFF, 0x000000},
+    {SCE_JSON_NUMBER,         13, 0x00FF00, 0x000000},
+    {SCE_JSON_STRING,         11, 0xFFFF00, 0x000000},
+    {SCE_JSON_STRINGEOL,      11, 0xFFFF00, 0x000000},
+    {SCE_JSON_PROPERTYNAME,   8,  0xFF8800, 0x000000},
+    {SCE_JSON_ESCAPESEQUENCE, 14, 0x8888FF, 0x000000},
+    {SCE_JSON_LINECOMMENT,    10, 0x008000, 0x000000},
+    {SCE_JSON_BLOCKCOMMENT,   10, 0x008000, 0x000000},
+    {SCE_JSON_OPERATOR,       9,  0xAA00BB, 0x000000},
+    {SCE_JSON_URI,            11, 0x0000FF, 0x000000},
+    {SCE_JSON_COMPACTIRI,     6,  0x00AAAA, 0x000000},
+    {SCE_JSON_KEYWORD,        5,  0x0000FF, 0x000000},
+    {SCE_JSON_LDKEYWORD,      6,  0x00AAAA, 0x000000},
+    {SCE_JSON_ERROR,          15, 0xFF0000, 0x000000},
+};
+
+std::pair<int, std::string> keywordsJSON[] =
+{
+    {0, "false true null"},
+    {1,
+"@id @context @type @value @language @container @list @set @reverse @index "
+"@base @vocab @graph "
+    },
+};
+
+std::pair<std::string, std::string> propertiesJSON[] =
+{
+    {"lexer.json.escape.sequence", "1"},
+    {"lexer.json.allow.comments", "1"},
+};
+
+constexpr std::array<int, 4> stylesBash[] =
+{
+    {SCE_SH_DEFAULT,      0, 0xFFFFFF, 0x000000},
+    {SCE_SH_ERROR,        15, 0xFF0000, 0x000000},
+    {SCE_SH_COMMENTLINE,  10, 0x008000, 0x000000},
+    {SCE_SH_NUMBER,       13, 0x00FF00, 0x000000},
+    {SCE_SH_WORD,         6,  0x0000FF, 0x000000},
+    {SCE_SH_STRING,       11, 0xFFFF00, 0x000000},
+    {SCE_SH_CHARACTER,    12, 0x0000FF, 0x000000},
+    {SCE_SH_OPERATOR,     9,  0xAA00BB, 0x000000},
+    {SCE_SH_IDENTIFIER,   0,  0xFFFFFF, 0x000000},
+    {SCE_SH_SCALAR,       5,  0xFF8800, 0x000000},
+    {SCE_SH_PARAM,        5,  0xFF8800, 0x000000},
+    {SCE_SH_BACKTICKS,    5,  0xFF8800, 0x000000},
+    {SCE_SH_HERE_DELIM,   7,  0xAAAAAA, 0x000000},
+    {SCE_SH_HERE_Q,       7,  0xAAAAAA, 0x000000},
+};
+
+std::pair<int, std::string> keywordsBash[] =
+{
+    {0,
+// Keywords
+"case do done elif else esac fi for function if in select then time until while "
+// Builtins
+"alias bg bind break builtin caller cd command compgen complete compopt continue "
+"declare dirs disown echo enable eval exec exit export fc fg getopts hash help "
+"history jobs kill let local logout mapfile popd printf pushd pwd read readarray "
+"readonly return set shift shopt source suspend test times trap type typeset ulimit "
+"umask unalias unset wait "
+    },
+};
+
+constexpr std::array<int, 4> stylesPascal[] =
+{
+    {SCE_PAS_DEFAULT,       0, 0xFFFFFF, 0x000000},
+    {SCE_PAS_IDENTIFIER,    0, 0xFFFFFF, 0x000000},
+    {SCE_PAS_COMMENT,       10, 0x008000, 0x000000},
+    {SCE_PAS_COMMENT2,      10, 0x008000, 0x000000},
+    {SCE_PAS_COMMENTLINE,   10, 0x008000, 0x000000},
+    {SCE_PAS_PREPROCESSOR,  8,  0xFF00FF, 0x000000},
+    {SCE_PAS_PREPROCESSOR2, 8,  0xFF00FF, 0x000000},
+    {SCE_PAS_NUMBER,        13, 0x00FF00, 0x000000},
+    {SCE_PAS_HEXNUMBER,     13, 0x00FF00, 0x000000},
+    {SCE_PAS_WORD,          5,  0x0000FF, 0x000000},
+    {SCE_PAS_STRING,        11, 0xFFFF00, 0x000000},
+    {SCE_PAS_STRINGEOL,     11, 0xFFFF00, 0x000000},
+    {SCE_PAS_CHARACTER,     12, 0x0000FF, 0x000000},
+    {SCE_PAS_OPERATOR,      9,  0xAA00BB, 0x000000},
+    {SCE_PAS_ASM,           7,  0xAAAAAA, 0x000000}
+};
+
+std::pair<int, std::string> keywordsPascal[] =
+{
+    {0,
+// Pascal
+"and array asm begin break case const constructor continue destructor div do "
+"downto else end false file for function goto if implementation in inline interface "
+"label mod nil not object of on operator or packed procedure program record "
+"repeat set shl shr string then to true type unit until uses var while with xor "
+
+"as class constref dispose except exit exports finalization finally inherited "
+"initialization is library new on out property raise self threadvar try far near "
+
+"absolute abstract alias assembler cdecl Cppdecl default export external forward "
+"generic index local name nostackframe oldfpccall override pascal private protected "
+"public published read register reintroduce safecall softfloat specialize stdcall "
+"virtual write "
+
+// Delphi
+"resourcestring dispinterface strict nodefault stored automated final readonly "
+"unsafe reference varargs contains helper overload implements winapi delayed package "
+"requires deprecated resident writeonly dispid platform dynamic sealed experimental "
+"message static "
+    }
+};
+
+void Editor::configureStyling(Language language){
     //Style configuration
     TColorAttr textColor = {0xFFFFFF, 0x000000};
     turbo::setStyleColor(scintilla, STYLE_DEFAULT, textColor);
@@ -262,6 +400,8 @@ void Editor::configureStyling(Scintilla::ILexer5* lexer, Language lang){
 
     TColorAttr selectionColor = {0xFFFFFF, 0x444466};
     turbo::setSelectionColor(scintilla, selectionColor);
+
+    Scintilla::ILexer5 *lexer = getLexerForLanguage(language);
 
     if(!lexer) {
         turbo::call(scintilla, SCI_SETLEXER, SCLEX_NULL, 0);
@@ -277,27 +417,56 @@ void Editor::configureStyling(Scintilla::ILexer5* lexer, Language lang){
     turbo::call(scintilla, SCI_COLOURISE, 0, -1);
 
 
-    switch (lang) {
-        case Language::Cpp:
-            for (int i = 0; i < 16; i++) {
-                TColorAttr color = {stylesC[i][2], stylesC[i][3]};
-                turbo::setStyleColor(scintilla, stylesC[i][0], color);
+    switch (language) {
+        case Language::CPP:
+            for(const auto &s : stylesC) {
+                TColorAttr color = { s[2], s[3] };
+                turbo::setStyleColor(scintilla, s[0], color);
             }
-            for (int i = 0; i < 3; i++)
-                turbo::call(scintilla, SCI_SETKEYWORDS, keywordsC[i].first, (sptr_t)keywordsC[i].second.c_str());
-            for (int i = 0; i < 3; i++)
-                turbo::call(scintilla, SCI_SETPROPERTY, (sptr_t)propertiesC[i].first.c_str(), (sptr_t)propertiesC[i].second.c_str());
+            for(const auto &k : keywordsC)
+                turbo::call(scintilla, SCI_SETKEYWORDS, k.first, (sptr_t)k.second.c_str());
+            for(const auto &p : propertiesC)
+                turbo::call(scintilla, SCI_SETPROPERTY, (sptr_t)p.first.c_str(), (sptr_t)p.second.c_str());
             break;
 
         case Language::Python:
-            for (int i = 0; i < 20; i++) {
-                TColorAttr color = {stylesPython[i][1], stylesPython[i][2]};
-                turbo::setStyleColor(scintilla, stylesPython[i][0], color);
+            for(const auto &s : stylesPython) {
+                TColorAttr color = { s[1], s[2] };
+                turbo::setStyleColor(scintilla, s[0], color);
             }
-            for (int i = 0; i < 2; i++)
-                turbo::call(scintilla, SCI_SETKEYWORDS, keywordsPython[i].first, (sptr_t)keywordsPython[i].second.c_str());
-            for (int i = 0; i < 1; i++)
-                turbo::call(scintilla, SCI_SETPROPERTY, (sptr_t)propertiesPython[i].first.c_str(), (sptr_t)propertiesPython[i].second.c_str());
+            for(const auto &k : keywordsPython)
+                turbo::call(scintilla, SCI_SETKEYWORDS, k.first, (sptr_t)k.second.c_str());
+            for(const auto &p : propertiesPython)
+                turbo::call(scintilla, SCI_SETPROPERTY, (sptr_t)p.first.c_str(), (sptr_t)p.second.c_str());
+            break;
+
+        case Language::JSON:
+            for(const auto &s : stylesJSON) {
+                TColorAttr color = { s[1], s[2] };
+                turbo::setStyleColor(scintilla, s[0], color);
+            }
+            for(const auto &k : keywordsJSON)
+                turbo::call(scintilla, SCI_SETKEYWORDS, k.first, (sptr_t)k.second.c_str());
+            for(const auto &p : propertiesJSON)
+                turbo::call(scintilla, SCI_SETPROPERTY, (sptr_t)p.first.c_str(), (sptr_t)p.second.c_str());
+            break;
+
+        case Language::Bash:
+            for(const auto &s : stylesBash) {
+                TColorAttr color = { s[1], s[2] };
+                turbo::setStyleColor(scintilla, s[0], color);
+            }
+            for(const auto &k : keywordsBash)
+                turbo::call(scintilla, SCI_SETKEYWORDS, k.first, (sptr_t)k.second.c_str());
+            break;
+
+        case Language::Pascal:
+            for(const auto &s : stylesPascal) {
+                TColorAttr color = { s[1], s[2] };
+                turbo::setStyleColor(scintilla, s[0], color);
+            }
+            for(const auto &k : keywordsPascal)
+                turbo::call(scintilla, SCI_SETKEYWORDS, k.first, (sptr_t)k.second.c_str());
             break;
 
         default:

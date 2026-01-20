@@ -6,6 +6,15 @@
 #include <set>
 #include <string>
 
+enum class Language : uint8_t {
+    None,
+    CPP,
+    Python,
+    JSON,
+    Bash,
+    Pascal
+};
+
 struct EditorObserver{
 public:
     virtual void editorUpdate() = 0;
@@ -14,13 +23,6 @@ public:
 struct Editor : turbo::TScintillaParent{
 
 public:
-    enum class Language {
-        None,
-        Cpp,
-        Python,
-        //
-    };
-
     Editor();
     void setSize(const TPoint& size);
     void paint(TDrawSurface& surface, TRect area);
@@ -45,8 +47,7 @@ public:
 
 private:
     void updateAll();
-    void configureStyling(Scintilla::ILexer5* lexer, Language lang);   
-    std::pair<Scintilla::ILexer5*, Editor::Language>  getLexerForExtension(const std::string& path);
+    void configureStyling(Language language);   
 
 private:
     std::string path;
