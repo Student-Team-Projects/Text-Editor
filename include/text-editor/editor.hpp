@@ -6,6 +6,15 @@
 #include <set>
 #include <string>
 
+enum class Language : uint8_t {
+    None,
+    CPP,
+    Python,
+    JSON,
+    Bash,
+    Pascal
+};
+
 struct EditorObserver{
 public:
     virtual void editorUpdate() = 0;
@@ -38,6 +47,7 @@ public:
 
 private:
     void updateAll();
+    void configureStyling(Language language);   
 
 private:
     std::string path;
