@@ -21,6 +21,13 @@ Copyright (c) 2025 Mikołaj Rams
 
 Copyright (c) 2025 Antoni Długosz
 
+Copyright (c) 2026 Mateusz Gabzdyl
+
+Copyright (c) 2026 Michał Mańka
+
+Copyright (c) 2026 Kacper Paciorek
+
+Copyright (c) 2026 Oleksandr Tymkovych
 
 Licensed under the MIT license.
 
